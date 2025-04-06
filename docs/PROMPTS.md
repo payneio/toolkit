@@ -1,0 +1,5 @@
+- Ok. This step is important. When working with you (claude code) in the future, I'm going to want to populate your context appropriately by having you read
+   a file. That file should contain everything you need to be able to generate a new tool for a given purpose. It should have nothing else. It should 
+  definitely contain a list of steps to follow to check if another tool already exists, select a name and description for the tool, generate the tool 
+  appropriately (including the tools.toml file, the script, the man page) and then install the script so it immediately can be used. Again, this should be 
+  concise, yet have everything needed for a code assistant such as yourself to accomplish the task perfectly.
