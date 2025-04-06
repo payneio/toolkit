@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
     
     if not args.input_file.endswith('.docx'):
-        print(f"Error: Input file must be a .docx file", file=sys.stderr)
+        print("Error: Input file must be a .docx file", file=sys.stderr)
         return 1
     
     input_file = args.input_file
@@ -23,7 +23,7 @@ def main():
     
     try:
         # Convert using pandoc
-        result = subprocess.run(
+        subprocess.run(
             ["pandoc", input_file, "-f", "docx", "-t", "markdown", "-o", output_file, "--extract-media=./media"],
             check=True,
             capture_output=True,

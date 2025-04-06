@@ -50,11 +50,10 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
    git clone https://github.com/yourusername/toolkit.git ~/toolkit
    ```
 
-2. Create symlinks to your utilities:
+2. Build and install tools:
    ```bash
-   mkdir -p ~/.local/bin
    cd ~/toolkit
-   ./setup-links.sh
+   make all
    ```
 
 3. Ensure `~/.local/bin` is in your PATH:
@@ -64,69 +63,86 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 
 ## Creating New Utilities
 
-### 1. Create a new utility script
+The toolkit provides a simple workflow for creating new utilities using the `make` system.
+
+### Creating a new tool with the make system
+
+The easiest way to create a new tool is to use the `new-tool` make target:
+
+```bash
+cd ~/toolkit
+make new-tool name=newtool
+```
+
+This will:
+1. Create the tool directory structure
+2. Add a template Python script with proper docstrings
+3. Create the tools.toml configuration file
+4. Generate the man page
+5. Create the bin launcher script
+
+### Tool Configuration File (tools.toml)
+
+Each tool includes a `tools.toml` configuration file:
+
+```toml
+[tool]
+command = "mytool"
+script = "mytool/mytool.py"
+description = "Description of the tool"
+version = "1.0.0"
+system_dependencies = ["optional-system-dependency"]
+```
+
+This configuration is used by the `make` system to generate bin launchers and man pages.
+
+### Tool Implementation Pattern
+
+A typical tool follows this pattern:
 
 ```python
 #!/usr/bin/env python3
-# ~/toolkit/tools/calendar/add.py
 """
-cal-add: Add an event to calendar
-Usage: cal-add [options]
+mytool: Description of the tool
+
+Detailed explanation of what the tool does.
+
+Usage: mytool [options]
+
+Examples:
+  mytool input.txt           # Process a file
+  cat input.txt | mytool     # Process stdin
 """
 import sys
-import json
 import argparse
-from toolkit import calendar_utils
 
 def main():
-    parser = argparse.ArgumentParser(description="Add event to calendar")
-    parser.add_argument('-f', '--file', help="Input file (default: stdin)")
+    parser = argparse.ArgumentParser(description="Tool description")
+    parser.add_argument('input', nargs='?', help="Input file (default: stdin)")
+    parser.add_argument('-v', '--version', action='version', version='mytool 1.0.0')
     args = parser.parse_args()
     
     # Read from stdin or file
-    if args.file:
-        with open(args.file) as f:
-            data = json.load(f)
+    if args.input:
+        with open(args.input) as f:
+            data = f.read()
     else:
-        data = json.load(sys.stdin)
+        data = sys.stdin.read()
     
     # Process data
-    result = calendar_utils.add_event(data)
+    result = process_data(data)
     
     # Output results to stdout
-    json.dump(result, sys.stdout)
+    print(result)
     return 0
 
 if __name__ == "__main__":
     sys.exit(main())
 ```
 
-### 2. Create a launcher script
+### Adding Dependencies
 
-```bash
-#!/usr/bin/env bash
-# ~/toolkit/bin/cal-add
-
-# Run with UV for automatic dependency management
-uv run --project-dir ~/toolkit ~/toolkit/tools/calendar/add.py "$@"
-```
-
-### 3. Make both scripts executable
-
-```bash
-chmod +x ~/toolkit/tools/calendar/add.py
-chmod +x ~/toolkit/bin/cal-add
-```
-
-### 4. Link to ~/.local/bin
-
-```bash
-ln -sf ~/toolkit/bin/cal-add ~/.local/bin/cal-add
-```
-
-### 5. Update dependencies
-
-Add any new dependencies to `pyproject.toml`:
+Add any new dependencies to `pyproject.toml` and then run `make build`:
 
 ```toml
 [project]
@@ -135,13 +151,14 @@ version = "0.1.0"
 dependencies = [
   "requests>=2.28.0",
   "beautifulsoup4>=4.11.0",
+  "toml>=0.10.2",
   # Add new dependencies here
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=7.0.0",
-  "black>=22.0.0",
+  "ruff>=0.11.4",
 ]
 ```
 
@@ -197,28 +214,54 @@ As your collection grows to hundreds or thousands of utilities:
 
 ## Development Workflow
 
-For active development:
+The toolkit framework provides make targets for common development tasks:
 
 ```bash
-# Navigate to scripts directory
+# Navigate to toolkit directory
 cd ~/toolkit
 
-# Install in development mode (if needed)
-uv pip install -e .
+# Run all the tasks (build, generate bin scripts, man pages, install)
+make all
 
-# Run tests
-uvx pytest
+# Regenerate bin launchers
+make bin
 
-# Linting
-uvx ruff
+# Generate man pages
+make man
 
+# Build and sync dependencies
+make build
+
+# Run linting
+make check
+
+# Install symlinks to ~/.local/bin
+make install-links
+
+# Install man pages
+make install-docs
+
+# Clean up generated files
+make clean
 ```
 
-## Advantages of This Approach
+You can also run tests with:
 
-- **Composability**: Tools work together through Unix pipes
-- **Modularity**: Easy to add, modify, or replace individual tools
-- **Dependency Management**: UV handles Python dependencies
-- **Discoverability**: Commands available in PATH
-- **Maintainability**: Organized structure scales to many utilities
-- **Flexibility**: Works with cron, interactive use, and chaining
+```bash
+uvx pytest
+```
+
+## Tool Discovery and Help
+
+The toolkit includes a built-in help system to discover and learn about available tools:
+
+```bash
+# List all available tools
+toolkit
+
+# Get detailed information about a specific tool
+toolkit --info gpt
+
+# Get JSON output of all tools
+toolkit --json
+```

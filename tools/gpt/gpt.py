@@ -17,7 +17,7 @@ import os
 import json
 import argparse
 import openai
-from typing import Optional, Dict, Any
+from typing import Optional
 
 # Default settings
 DEFAULT_MODEL = "gpt-3.5-turbo"

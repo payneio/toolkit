@@ -15,4 +15,4 @@ if [ ! -f "$TOOL_SCRIPT" ]; then
 fi
 
 # Run the tool script using UV for dependency management
-uv run --project-dir "$TOOLKIT_DIR" "$TOOL_SCRIPT" "$@"
+uv run --project "$TOOLKIT_DIR" "$TOOL_SCRIPT" "$@"
