@@ -1,0 +1,6 @@
+- Make generation of launchiners in `bin` dir. E.g. `make bin`
+- Make file to install man files (`make install-docs`)
+- Make file instead of `setup-links.sh` (`make install`)
+- `make build` to `uv sync --all`
+- `make check` to run `uvx ruff check`
+- make standard tools.toml in each tool directory and use that for `scripts-help`.

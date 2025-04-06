@@ -1,0 +1,6 @@
+[tool]
+command = "my-echo"
+script = "my-echo/my-echo.py"
+description = "A simple echo utility"
+version = "1.0.0"
+system_dependencies = []

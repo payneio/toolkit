@@ -6,7 +6,7 @@ SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 TOOLKIT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Tool information 
-TOOL_SCRIPT="$TOOLKIT_DIR/tools/my-echo/my-echo.py"
+TOOL_SCRIPT="$TOOLKIT_DIR/tools/gpt/gpt.py"
 
 # Check if the tool script exists
 if [ ! -f "$TOOL_SCRIPT" ]; then
@@ -15,4 +15,4 @@ if [ ! -f "$TOOL_SCRIPT" ]; then
 fi
 
 # Run the tool script using UV for dependency management
-uv run --project "$TOOLKIT_DIR" "$TOOL_SCRIPT" "$@"
+uv run --project-dir "$TOOLKIT_DIR" "$TOOL_SCRIPT" "$@"

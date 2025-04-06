@@ -1,4 +1,4 @@
-# Personal Scripts Framework
+# Personal Toolkit Framework
 
 A structured approach to managing personal utility scripts following the Unix philosophy while leveraging Python's ecosystem.
 
@@ -16,7 +16,7 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 ## Directory Structure
 
 ```
-~/scripts/
+~/toolkit/
 ├── bin/              # Launcher scripts
 ├── tools/            # Individual utilities
 │   ├── calendar/     # Calendar-related tools
@@ -27,7 +27,7 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 │   └── sms/          # SMS-related tools
 │       └── parse.py
 ├── src/              # Shared library code
-│   └── myscripts/    
+│   └── toolkit/    
 │       ├── __init__.py
 │       ├── calendar_utils.py
 │       └── parsers.py
@@ -47,13 +47,13 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/scripts.git ~/scripts
+   git clone https://github.com/yourusername/toolkit.git ~/toolkit
    ```
 
 2. Create symlinks to your utilities:
    ```bash
    mkdir -p ~/.local/bin
-   cd ~/scripts
+   cd ~/toolkit
    ./setup-links.sh
    ```
 
@@ -68,7 +68,7 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 
 ```python
 #!/usr/bin/env python3
-# ~/scripts/tools/calendar/add.py
+# ~/toolkit/tools/calendar/add.py
 """
 cal-add: Add an event to calendar
 Usage: cal-add [options]
@@ -76,7 +76,7 @@ Usage: cal-add [options]
 import sys
 import json
 import argparse
-from myscripts import calendar_utils
+from toolkit import calendar_utils
 
 def main():
     parser = argparse.ArgumentParser(description="Add event to calendar")
@@ -105,23 +105,23 @@ if __name__ == "__main__":
 
 ```bash
 #!/usr/bin/env bash
-# ~/scripts/bin/cal-add
+# ~/toolkit/bin/cal-add
 
 # Run with UV for automatic dependency management
-uv run ~/scripts/tools/calendar/add.py "$@"
+uv run --project-dir ~/toolkit ~/toolkit/tools/calendar/add.py "$@"
 ```
 
 ### 3. Make both scripts executable
 
 ```bash
-chmod +x ~/scripts/tools/calendar/add.py
-chmod +x ~/scripts/bin/cal-add
+chmod +x ~/toolkit/tools/calendar/add.py
+chmod +x ~/toolkit/bin/cal-add
 ```
 
 ### 4. Link to ~/.local/bin
 
 ```bash
-ln -sf ~/scripts/bin/cal-add ~/.local/bin/cal-add
+ln -sf ~/toolkit/bin/cal-add ~/.local/bin/cal-add
 ```
 
 ### 5. Update dependencies
@@ -130,7 +130,7 @@ Add any new dependencies to `pyproject.toml`:
 
 ```toml
 [project]
-name = "myscripts"
+name = "toolkit"
 version = "0.1.0"
 dependencies = [
   "requests>=2.28.0",
@@ -201,13 +201,16 @@ For active development:
 
 ```bash
 # Navigate to scripts directory
-cd ~/scripts
+cd ~/toolkit
 
 # Install in development mode (if needed)
 uv pip install -e .
 
 # Run tests
-pytest
+uvx pytest
+
+# Linting
+uvx ruff
 
 ```
 

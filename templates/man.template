@@ -1,11 +1,11 @@
-.TH MY-ECHO 1 "2025-04-06" "Toolkit" "User Commands"
+.TH {{COMMAND_UPPER}} 1 "{{DATE}}" "Toolkit" "User Commands"
 .SH NAME
-my-echo \- A simple echo utility
+{{command}} \- {{description}}
 .SH SYNOPSIS
-.B my-echo
+.B {{command}}
 [\fIOPTIONS\fR]
 .SH DESCRIPTION
-A simple echo utility
+{{description}}
 .SH OPTIONS
 .TP
 .B \-\-help
@@ -15,6 +15,6 @@ Show help message and exit.
 Show version information and exit.
 .SH EXAMPLES
 .PP
-my-echo --help
+{{command}} --help
 .SH SEE ALSO
 .BR toolkit-help (1)

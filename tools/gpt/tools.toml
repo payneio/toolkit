@@ -1,0 +1,6 @@
+[tool]
+command = "gpt"
+script = "gpt/gpt.py"
+description = "A simple OpenAI text generation utility"
+version = "1.0.0"
+system_dependencies = []
