@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Run with UV for automatic dependency management
+uv run /data/repos/scripts/tools/document/docx2md.py "$@"

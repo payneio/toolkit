@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Help utility for the scripts framework
+
+# Handle symlink resolution more robustly
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+# If the repository structure doesn't match expectations, try standard locations
+if [[ ! -d "$REPO_DIR/tools" ]]; then
+  for potential_repo in "$HOME/scripts" "$HOME/repos/scripts" "/data/repos/scripts"; do
+    if [[ -d "$potential_repo/tools" ]]; then
+      REPO_DIR="$potential_repo"
+      break
+    fi
+  done
+fi
+
+BIN_DIR="$REPO_DIR/bin"
+TOOLS_DIR="$REPO_DIR/tools"
+
+# Debug info if --debug flag is used
+if [[ "$1" == "--debug" ]]; then
+  echo "Script path: $SOURCE"
+  echo "Script directory: $SCRIPT_DIR"
+  echo "Repository directory: $REPO_DIR"
+  echo "Bin directory: $BIN_DIR"
+  echo "Tools directory: $TOOLS_DIR"
+  exit 0
+fi
+
+if [[ "$1" == "--version" ]]; then
+  echo "scripts-help 1.0.0"
+  exit 0
+fi
+
+echo "Scripts Framework Help"
+echo "======================"
+echo ""
+echo "Available Commands:"
+echo ""
+
+# Find all executable files in the bin directory, excluding this script
+if [[ -d "$BIN_DIR" ]]; then
+  find "$BIN_DIR" -type f -executable | sort | while read -r file; do
+      cmd=$(basename "$file")
+      if [[ "$cmd" != "scripts-help" ]]; then
+          # Try to extract description from Python file
+          for tool_dir in "$TOOLS_DIR"/*; do
+            if [[ -d "$tool_dir" ]]; then
+              tool_name=$(basename "$tool_dir")
+              tool_py="$tool_dir/${tool_name}.py"
+              if [[ -f "$tool_py" ]]; then
+                  desc=$(grep -A 1 '"""' "$tool_py" | head -2 | tail -1 | sed 's/^[^:]*: //')
+                  if [[ "$tool_name" == "$cmd" ]]; then
+                    printf "  %-15s %s\n" "$cmd" "$desc"
+                    break
+                  fi
+              fi
+            fi
+          done
+      fi
+  done
+else
+  echo "  No commands found (repository structure issue)"
+  echo "  Run with --debug to see path resolution details"
+fi
+
+echo ""
+echo "Usage:"
+echo "  <command> [options] [arguments]"
+echo "  <command> --help     Display help for a specific command"
+echo "  <command> --man      Display manual page for a specific command"
+echo ""
+echo "Example:"
+echo "  my-echo \"Hello, world\""
+echo "  my-echo -u \"Hello, world\""
+echo "  my-echo --help"
+echo ""
+echo "For more information, check the README.md file in $REPO_DIR"

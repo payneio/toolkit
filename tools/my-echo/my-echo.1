@@ -1,0 +1,54 @@
+.TH MY-ECHO 1 "April 2025" "myscripts 1.0.0" "User Commands"
+.SH NAME
+my-echo \- display a line of text or process JSON data
+.SH SYNOPSIS
+.B my-echo
+[\fIOPTIONS\fR]
+[\fIMESSAGE\fR]
+.SH DESCRIPTION
+.B my-echo
+is a utility tool that displays text or processes JSON data with optional transformations.
+It can read input from arguments or stdin, making it useful in pipelines.
+.PP
+If no MESSAGE is provided, my-echo reads from standard input.
+.SH OPTIONS
+.TP
+.BR \-u ", " \-\-uppercase
+Convert text to uppercase. When used with JSON input, only string values are converted.
+.TP
+.BR \-j ", " \-\-json
+Parse input as JSON and output formatted JSON. Returns the input wrapped in an "echo" field.
+.TP
+.BR \-h ", " \-\-help
+Display help message and exit.
+.TP
+.BR \-v ", " \-\-version
+Display version information and exit.
+.SH EXAMPLES
+.TP
+.B my-echo "Hello, world"
+Echo a simple text message.
+.TP
+.B my-echo -u "Hello, world"
+Echo a message in uppercase.
+.TP
+.B my-echo -j '{"name":"John"}'
+Process JSON input and output the parsed JSON.
+.TP
+.B cat file.json | my-echo -j
+Read JSON from a file via stdin.
+.TP
+.B my-echo -j -u '{"key":"value"}'
+Parse JSON input and convert string values to uppercase.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Invalid JSON input or other error.
+.SH AUTHOR
+Written as part of the myscripts framework.
+.SH SEE ALSO
+.BR cat (1),
+.BR jq (1)

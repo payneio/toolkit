@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Simple echo utility launcher
+
+# Handle symlink resolution more robustly
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+# First check the expected location relative to bin directory
+TOOL_DIR="$REPO_DIR/tools/my-echo"
+
+# If that doesn't exist, search for it in the standard locations
+if [[ ! -d "$TOOL_DIR" ]]; then
+  for potential_repo in "$HOME/scripts" "$HOME/repos/scripts" "/data/repos/scripts"; do
+    if [[ -d "$potential_repo/tools/my-echo" ]]; then
+      REPO_DIR="$potential_repo"
+      TOOL_DIR="$REPO_DIR/tools/my-echo"
+      break
+    fi
+  done
+fi
+
+SCRIPT_PATH="$TOOL_DIR/my-echo.py"
+MAN_PAGE="$TOOL_DIR/my-echo.1"
+
+# Debug info if --debug flag is used
+if [[ "$1" == "--debug" ]]; then
+  echo "Script path: $SOURCE"
+  echo "Script directory: $SCRIPT_DIR"
+  echo "Repository directory: $REPO_DIR"
+  echo "Tool directory: $TOOL_DIR"
+  echo "Python script: $SCRIPT_PATH"
+  echo "Man page: $MAN_PAGE"
+  exit 0
+fi
+
+# Handle special cases
+if [[ "$1" == "--man" ]]; then
+    # Display man page if man is available
+    if command -v man &> /dev/null && [[ -f "$MAN_PAGE" ]]; then
+        man "$MAN_PAGE"
+    else
+        # Fallback if man is not available
+        if [[ -f "$MAN_PAGE" ]]; then
+          cat "$MAN_PAGE"
+        else
+          echo "Error: Man page not found at $MAN_PAGE"
+          exit 1
+        fi
+    fi
+    exit 0
+fi
+
+if [[ "$1" == "--version" ]]; then
+    echo "my-echo 1.0.0"
+    exit 0
+fi
+
+# Check if the script exists
+if [[ ! -f "$SCRIPT_PATH" ]]; then
+  echo "Error: Script not found at $SCRIPT_PATH"
+  echo "Please run with --debug to see path resolution information"
+  exit 1
+fi
+
+# Run with UV for automatic dependency management
+uv run "$SCRIPT_PATH" "$@"
