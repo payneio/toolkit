@@ -3,18 +3,81 @@
 gpt \- A simple OpenAI text generation utility
 .SH SYNOPSIS
 .B gpt
-[\fIOPTIONS\fR]
+[\fIOPTIONS\fR] [\fIPROMPT\fR]
 .SH DESCRIPTION
-A simple OpenAI text generation utility
+The \fBgpt\fR utility generates text using OpenAI's GPT models based on user prompts.
+It can read prompts from command-line arguments or standard input, and outputs
+the generated text to standard output.
 .SH OPTIONS
 .TP
-.B \-\-help
-Show help message and exit.
+.B \-m, \-\-model MODEL
+The GPT model to use (default: gpt-3.5-turbo)
 .TP
-.B \-\-version
+.B \-t, \-\-temperature FLOAT
+Temperature for text generation (default: 0.7)
+.br
+Higher values produce more random outputs, lower values are more deterministic.
+Range: 0.0-2.0
+.TP
+.B \-n, \-\-max-tokens INT
+Maximum tokens in the response (default: 500)
+.br
+Limits the length of the generated text.
+.TP
+.B \-j, \-\-json
+Output result as JSON in the format: {"prompt": "your prompt", "result": "generated text"}
+.TP
+.B \-h, \-\-help
+Show a help message and exit.
+.TP
+.B \-v, \-\-version
 Show version information and exit.
 .SH EXAMPLES
 .PP
-gpt --help
+Generate a haiku about programming:
+.PP
+.B gpt "Write a haiku about programming"
+.PP
+Use a specific GPT model:
+.PP
+.B gpt -m gpt-4 "Explain quantum computing"
+.PP
+Read prompt from a file:
+.PP
+.B cat prompt.txt | gpt
+.PP
+Adjust temperature for more creative output:
+.PP
+.B gpt -t 1.2 "Write creative story"
+.PP
+Get JSON-formatted output:
+.PP
+.B gpt -j "Define artificial intelligence"
+.SH ENVIRONMENT
+.TP
+.B OPENAI_API_KEY
+Your OpenAI API key. If not set, the tool will look for it in config files.
+.SH FILES
+.TP
+.B ~/.config/openai/config.json
+Primary config file location for storing your OpenAI API key.
+.TP
+.B ~/.openai/config.json
+Secondary config file location.
+.PP
+Config file format:
+.PP
+{"api_key": "your-api-key-here"}
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (invalid arguments, API key not found, OpenAI API error).
 .SH SEE ALSO
-.BR toolkit-help (1)
+.BR toolkit (1)
+.SH AUTHOR
+Toolkit Team
+.SH COPYRIGHT
+Copyright © 2025 Toolkit Team. Licensed under MIT License.

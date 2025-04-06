@@ -32,7 +32,7 @@ install-links:
 	@echo "Make sure $(TARGET_BIN_DIR) is in your PATH, e.g.:"
 	@echo "export PATH=\"$(HOME)/.local/bin:\$$PATH\""
 
-# Generate man pages from tools.toml files
+# Generate man pages from tools.toml files - but NEVER overwrite existing ones
 man:
 	@echo "Generating man pages..."
 	@for toml in $(TOOLS_TOML); do \
@@ -46,14 +46,19 @@ man:
 				*"description ="*) \
 					desc=$$(echo "$$line" | sed -E 's/description *= *"?([^"]*)"?/\1/'); \
 					if [ ! -z "$$cmd" ] && [ ! -z "$$desc" ]; then \
-						echo "Creating man page for $$cmd"; \
-						cmd_upper=$$(echo "$$cmd" | tr 'a-z' 'A-Z'); \
-						today=$$(date +%Y-%m-%d); \
-						cat templates/man.template | \
-							sed "s|{{COMMAND_UPPER}}|$$cmd_upper|g" | \
-							sed "s|{{command}}|$$cmd|g" | \
-							sed "s|{{description}}|$$desc|g" | \
-							sed "s|{{DATE}}|$$today|g" > "$(TOOLS_DIR)/$$category/$$cmd.1"; \
+						man_file="$(TOOLS_DIR)/$$category/$$cmd.1"; \
+						if [ -f "$$man_file" ]; then \
+							echo "Skipping existing man page for $$cmd"; \
+						else \
+							echo "Creating man page for $$cmd"; \
+							cmd_upper=$$(echo "$$cmd" | tr 'a-z' 'A-Z'); \
+							today=$$(date +%Y-%m-%d); \
+							cat templates/man.template | \
+								sed "s|{{COMMAND_UPPER}}|$$cmd_upper|g" | \
+								sed "s|{{command}}|$$cmd|g" | \
+								sed "s|{{description}}|$$desc|g" | \
+								sed "s|{{DATE}}|$$today|g" > "$$man_file"; \
+						fi; \
 						cmd=""; desc=""; \
 					fi \
 					;; \

@@ -5,16 +5,65 @@ toolkit \- Manage and discover toolkit utilities
 .B toolkit
 [\fIOPTIONS\fR]
 .SH DESCRIPTION
-Manage and discover toolkit utilities
+The \fBtoolkit\fR utility helps you discover and work with the available utilities
+in your toolkit framework. It provides a unified interface for listing tools,
+getting detailed information about specific tools, and formatting tool information
+for different use cases.
 .SH OPTIONS
 .TP
-.B \-\-help
-Show help message and exit.
+.B \-l, \-\-list
+List all available tools (this is the default behavior).
+.TP
+.B \-i, \-\-info \fITOOL\fR
+Show detailed information about a specific tool, including its
+description, category, version, dependencies, and help information.
+.TP
+.B \-j, \-\-json
+Output tool information in JSON format. This is useful for scripting
+and programmatic access to the toolkit information.
+.TP
+.B \-v, \-\-verbose
+Show verbose information including dependencies and version numbers.
+.TP
+.B \-h, \-\-help
+Show a help message and exit.
 .TP
 .B \-\-version
 Show version information and exit.
 .SH EXAMPLES
 .PP
-toolkit --help
+List all available tools:
+.PP
+.B toolkit
+.B toolkit --list
+.PP
+Get detailed information about a specific tool:
+.PP
+.B toolkit --info gpt
+.PP
+Output JSON-formatted information:
+.PP
+.B toolkit --json
+.PP
+Show verbose information about all tools:
+.PP
+.B toolkit --verbose
+.SH FILES
+.TP
+.B /tools/*/tools.toml
+Tool configuration files that define the tools available in the toolkit.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (tool not found).
 .SH SEE ALSO
-.BR toolkit-help (1)
+.BR gpt (1),
+.BR docx2md (1),
+.BR my-echo (1)
+.SH AUTHOR
+Toolkit Team
+.SH COPYRIGHT
+Copyright © 2025 Toolkit Team. Licensed under MIT License.

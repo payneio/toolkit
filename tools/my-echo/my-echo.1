@@ -3,18 +3,61 @@
 my-echo \- A simple echo utility
 .SH SYNOPSIS
 .B my-echo
-[\fIOPTIONS\fR]
+[\fIOPTIONS\fR] [\fIMESSAGE\fR]
 .SH DESCRIPTION
-A simple echo utility
+The \fBmy-echo\fR utility is a flexible echo tool that can process text or JSON input
+and apply transformations like converting to uppercase. It can read input from
+command-line arguments or standard input, and outputs to standard output.
 .SH OPTIONS
 .TP
-.B \-\-help
-Show help message and exit.
+.B \-u, \-\-uppercase
+Convert output to uppercase.
 .TP
-.B \-\-version
+.B \-j, \-\-json
+Parse input as JSON. When used, the input is parsed as JSON,
+wrapped in an "echo" object, and output as JSON.
+.TP
+.B \-h, \-\-help
+Show a help message and exit.
+.TP
+.B \-v, \-\-version
 Show version information and exit.
+.SH ARGUMENTS
+.TP
+.B MESSAGE
+Optional message to echo. If not provided, input is read from stdin.
 .SH EXAMPLES
 .PP
-my-echo --help
+Basic usage:
+.PP
+.B my-echo "Hello, world"
+.PP
+Convert to uppercase:
+.PP
+.B my-echo -u "Hello, world"
+.PP
+Process JSON input:
+.PP
+.B my-echo -j '{"name":"John"}'
+.PP
+Read JSON from stdin:
+.PP
+.B cat file.json | my-echo -j
+.PP
+Parse JSON and uppercase string values:
+.PP
+.B my-echo -j -u '{"key":"value"}'
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (invalid JSON input).
 .SH SEE ALSO
-.BR toolkit-help (1)
+.BR echo (1),
+.BR toolkit (1)
+.SH AUTHOR
+Toolkit Team
+.SH COPYRIGHT
+Copyright © 2025 Toolkit Team. Licensed under MIT License.

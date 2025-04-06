@@ -3,18 +3,41 @@
 docx2md \- Convert Word .docx files to Markdown
 .SH SYNOPSIS
 .B docx2md
-[\fIOPTIONS\fR]
+[\fIOPTIONS\fR] \fIFILE.docx\fR
 .SH DESCRIPTION
-Convert Word .docx files to Markdown
+The \fBdocx2md\fR utility converts Microsoft Word .docx documents to Markdown format.
+It uses pandoc internally to perform the conversion, and extracts any embedded media
+to a local directory.
 .SH OPTIONS
 .TP
-.B \-\-help
-Show help message and exit.
+.B \-h, \-\-help
+Show a help message and exit.
+.SH ARGUMENTS
 .TP
-.B \-\-version
-Show version information and exit.
+.B FILE.docx
+Input Word document file (must have .docx extension)
 .SH EXAMPLES
 .PP
-docx2md --help
+Convert a single document:
+.PP
+.B docx2md document.docx
+.PP
+This will create document.md in the current directory. Media files will be extracted to a ./media directory.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (invalid arguments, pandoc not installed, conversion error).
+.SH DEPENDENCIES
+.TP
+.B pandoc
+This tool requires pandoc to be installed for document conversion. If not installed, you'll receive instructions on how to install it.
 .SH SEE ALSO
-.BR toolkit-help (1)
+.BR pandoc (1),
+.BR toolkit (1)
+.SH AUTHOR
+Toolkit Team
+.SH COPYRIGHT
+Copyright © 2025 Toolkit Team. Licensed under MIT License.
