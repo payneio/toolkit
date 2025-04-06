@@ -1,0 +1,71 @@
+.TH HTML2TEXT 1 "2025-04-06" "Toolkit" "User Commands"
+.SH NAME
+html2text \- Convert HTML content to plain text
+.SH SYNOPSIS
+.B html2text
+[\fIOPTIONS\fR] [\fIFILE\fR]
+.SH DESCRIPTION
+Converts HTML content to readable plain text by removing HTML tags,
+preserving basic structure, and formatting the content for terminal viewing.
+Particularly useful for making HTML emails more readable in the terminal.
+.SH OPTIONS
+.TP
+.B \-w, \-\-width \fINUMBER\fR
+Maximum line width for text wrapping (default: 80).
+.TP
+.B \-h, \-\-help
+Show help message and exit.
+.TP
+.B \-v, \-\-version
+Show version information and exit.
+.SH ARGUMENTS
+.TP
+.B FILE
+HTML file to convert (default: reads from stdin).
+.SH EXAMPLES
+.PP
+Convert an HTML file to text:
+.PP
+.B html2text email.html
+.PP
+Convert HTML from stdin:
+.PP
+.B cat email.html | html2text
+.PP
+Use with protonmail to convert HTML emails:
+.PP
+.B protonmail read 42 | html2text
+.PP
+Set a custom line width:
+.PP
+.B html2text -w 100 email.html
+.SH FEATURES
+.PP
+The html2text tool intelligently converts HTML content to plain text:
+.PP
+.IP \(bu 2
+Maintains paragraph structure
+.IP \(bu 2
+Preserves lists (both ordered and unordered)
+.IP \(bu 2
+Shows links with their URLs
+.IP \(bu 2
+Formats headers with underlines
+.IP \(bu 2
+Properly indents blockquotes
+.IP \(bu 2
+Handles HTML entities and special characters
+.IP \(bu 2
+Wraps text to fit terminal width
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error reading input file.
+.SH SEE ALSO
+.BR protonmail (1),
+.BR toolkit (1)
+.SH AUTHOR
+Toolkit Team
