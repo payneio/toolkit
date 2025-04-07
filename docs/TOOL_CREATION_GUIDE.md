@@ -16,16 +16,29 @@ This guide provides the essential steps and information needed to create a new t
 
 3. **Create directory structure**
    - Make a category directory if needed: `mkdir -p tools/<category>`
-   - Create tool directory if needed: `mkdir -p tools/<category>/<toolname>`
+   - Create tool-specific directory ONLY if needed for complex tools: `mkdir -p tools/<category>/<toolname>`
 
-4. **Create tools.toml file**
+4. **Update category's tools.toml file**
+   - Each category has ONE tools.toml file at `tools/<category>/tools.toml`
+   - For multiple tools in a category, add each as a separate [tool] entry in the same file
+   - Create the file if it doesn't exist or append to it if it does
+   
    ```toml
+   # First tool in the category
    [tool]
    command = "tool-name"
    script = "category/tool-name.py"
    description = "Clear description of what the tool does"
    version = "1.0.0"
    system_dependencies = ["optional-dependency"]
+   
+   # Second tool in the same category (if applicable)
+   [tool]
+   command = "another-tool"
+   script = "category/another-tool.py"
+   description = "Description of another tool"
+   version = "1.0.0"
+   system_dependencies = ["another-dependency"]
    ```
 
 5. **Create Python script**
@@ -33,9 +46,9 @@ This guide provides the essential steps and information needed to create a new t
    - Follow script template below
    - Ensure script is executable: `chmod +x tools/<category>/<tool-name>.py`
 
-6. **Create man page**
-   - Create man page at `tools/<category>/<tool-name>.1`
-   - Follow man page template below
+6. **Documentation**
+   - Create good docstrings and help text in the script
+   - Documentation is provided through --help, not man pages
 
 7. **Create README.md (optional but recommended)**
    - Create a README.md if the tool needs additional developer information
@@ -105,57 +118,43 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-## Man Page Template
+## Help Text Template
 
+Your script's help text (shown with --help) should include:
+
+1. A clear description of what the tool does
+2. All command-line options explained
+3. Example usages
+4. Exit status codes
+5. Related tools (if any)
+
+Example help text format:
 ```
-.TH TOOL-NAME 1 "YYYY-MM-DD" "Toolkit" "User Commands"
-.SH NAME
-tool-name \- Description of the tool
-.SH SYNOPSIS
-.B tool-name
-[\fIOPTIONS\fR] [\fIARGUMENTS\fR]
-.SH DESCRIPTION
+tool-name: Description of the tool
+
 Detailed explanation of what the tool does, its purpose,
 and how it fits into workflows.
-.SH OPTIONS
-.TP
-.B \-o, \-\-output \fIFILE\fR
-Write output to FILE instead of stdout.
-.TP
-.B \-h, \-\-help
-Show help message and exit.
-.TP
-.B \-v, \-\-version
-Show version information and exit.
-.SH ARGUMENTS
-.TP
-.B FILE
-Input file to process (default: reads from stdin).
-.SH EXAMPLES
-.PP
-Basic usage:
-.PP
-.B tool-name input.txt
-.PP
-With output file:
-.PP
-.B tool-name -o output.txt input.txt
-.PP
-Reading from stdin:
-.PP
-.B cat input.txt | tool-name
-.SH EXIT STATUS
-.TP
-.B 0
-Success.
-.TP
-.B 1
-Error (with description of possible error conditions).
-.SH SEE ALSO
-.BR toolkit (1),
-.BR related-tool (1)
-.SH AUTHOR
-Toolkit Team
+
+Usage: tool-name [OPTIONS] [ARGUMENTS]
+
+Options:
+  -o, --output FILE      Write output to FILE instead of stdout
+  -h, --help             Show this help message and exit
+  -v, --version          Show version information and exit
+
+Arguments:
+  FILE                   Input file to process (default: reads from stdin)
+
+Examples:
+  tool-name input.txt                # Basic usage
+  tool-name -o output.txt input.txt  # With output file
+  cat input.txt | tool-name          # Reading from stdin
+
+Exit Status:
+  0  Success
+  1  Error (various conditions)
+
+See also: toolkit, related-tool
 ```
 
 ## Best Practices

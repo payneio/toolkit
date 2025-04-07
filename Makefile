@@ -1,6 +1,6 @@
 # Toolkit Project Makefile
 
-.PHONY: all install install-links install-docs build check clean bin man new-tool
+.PHONY: all install install-links build check clean bin new-tool
 
 # Directory paths
 REPO_DIR := $(shell pwd)
@@ -13,10 +13,10 @@ TARGET_MAN_DIR := $(HOME)/.local/share/man/man1
 TOOLS_TOML := $(shell find $(TOOLS_DIR) -name "tools.toml")
 
 # Default target
-all: bin man install build
+all: bin install build
 
-# Install both links and docs
-install: install-links install-docs
+# Install links
+install: install-links
 
 # Install symlinks to tools in ~/.local/bin
 install-links:
@@ -32,52 +32,7 @@ install-links:
 	@echo "Make sure $(TARGET_BIN_DIR) is in your PATH, e.g.:"
 	@echo "export PATH=\"$(HOME)/.local/bin:\$$PATH\""
 
-# Generate man pages from tools.toml files - but NEVER overwrite existing ones
-man:
-	@echo "Generating man pages..."
-	@for toml in $(TOOLS_TOML); do \
-		category=$$(basename $$(dirname $$toml)); \
-		echo "Processing $$category man pages..."; \
-		grep -A10 '^\[tool\]' $$toml | while IFS= read -r line; do \
-			case "$$line" in \
-				*"command ="*) \
-					cmd=$$(echo "$$line" | sed -E 's/command *= *"?([^"]*)"?/\1/') \
-					;; \
-				*"description ="*) \
-					desc=$$(echo "$$line" | sed -E 's/description *= *"?([^"]*)"?/\1/'); \
-					if [ ! -z "$$cmd" ] && [ ! -z "$$desc" ]; then \
-						man_file="$(TOOLS_DIR)/$$category/$$cmd.1"; \
-						if [ -f "$$man_file" ]; then \
-							echo "Skipping existing man page for $$cmd"; \
-						else \
-							echo "Creating man page for $$cmd"; \
-							cmd_upper=$$(echo "$$cmd" | tr 'a-z' 'A-Z'); \
-							today=$$(date +%Y-%m-%d); \
-							cat templates/man.template | \
-								sed "s|{{COMMAND_UPPER}}|$$cmd_upper|g" | \
-								sed "s|{{command}}|$$cmd|g" | \
-								sed "s|{{description}}|$$desc|g" | \
-								sed "s|{{DATE}}|$$today|g" > "$$man_file"; \
-						fi; \
-						cmd=""; desc=""; \
-					fi \
-					;; \
-			esac; \
-		done; \
-	done
-	@echo "Man pages generated."
-
-# Install man pages in ~/.local/share/man/man1
-install-docs: man
-	@echo "Installing man pages in $(TARGET_MAN_DIR)"
-	@echo "=================================="
-	@mkdir -p $(TARGET_MAN_DIR)
-	@find $(TOOLS_DIR) -name "*.1" | while read file; do \
-		filename=$$(basename $$file); \
-		echo "Installing man page for $$filename"; \
-		cp $$file $(TARGET_MAN_DIR)/; \
-	done
-	@echo "Man pages installed. Try 'man <toolname>' to view documentation."
+# Man pages have been removed from this project
 
 # Build - run uv sync to ensure all dependencies are up to date
 build:
@@ -151,9 +106,8 @@ new-tool:
 	@echo "Created new tool: $(TOOLS_DIR)/$(name)/$(name).py"
 	@echo "Created config:   $(TOOLS_DIR)/$(name)/tools.toml"
 	
-	# Generate bin launcher and man page
+	# Generate bin launcher
 	@$(MAKE) bin
-	@$(MAKE) man
 	
 	@echo "New tool '$(name)' created successfully."
 	@echo "Edit $(TOOLS_DIR)/$(name)/$(name).py to implement your tool."
