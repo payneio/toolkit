@@ -1,0 +1,27 @@
+[tool]
+command = "backup"
+script = "system/backup.py"
+description = "Complete backup system (both local and external phases)"
+version = "1.0.0"
+system_dependencies = ["rsync", "tar"]
+
+[tool]
+command = "backup-collect"
+script = "system/backup-collect.py"
+description = "Collect files from various sources into backup directory"
+version = "1.0.0"
+system_dependencies = ["rsync"]
+
+[tool]
+command = "backup-external"
+script = "system/backup-external.py"
+description = "Transfer backups to external media"
+version = "1.0.0"
+system_dependencies = ["rsync", "tar"]
+
+[tool]
+command = "backup-restore"
+script = "system/backup-restore.py"
+description = "Restore files from backup"
+version = "1.0.0"
+system_dependencies = ["rsync", "tar"]
