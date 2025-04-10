@@ -85,7 +85,7 @@ DEFAULT_CONFIG = {
     "name": "Default Collection",
     "include": {"patterns": ["*.pdf", "*.md", "*.txt", "*.docx"]},
     "exclude": {"patterns": ["*~", "*.bak", "*.tmp", ".git/*", ".search/*"]},
-    "extractors": DEFAULT_EXTRACTORS,
+    "extractors": {},  # Only define custom extractors here, defaults are used automatically
     "output": {"format": "json", "directory": "cache"},
 }
 
@@ -126,8 +126,26 @@ def save_config(collection_dir: str, config: Dict[str, Any]) -> bool:
         # Ensure the .search directory exists
         ensure_dir(os.path.join(collection_dir, SEARCH_DIR))
 
+        # Add a header comment to explain the extractors section
+        header = """# Search Collection Configuration
+#
+# Built-in extractors are automatically used for common file types:
+#   *.txt, *.md:   text-extractor {input}
+#   *.pdf:         pdf-extractor {input}
+#   *.docx:        docx-extractor {input}
+#
+# The [extractors] section below only needs to define custom extractors
+# or overrides for specific file types.
+#
+"""
+        # Format the config as TOML
+        config_toml = toml.dumps(config)
+        
+        # Write the file with header
         with open(config_path, "w") as f:
-            toml.dump(config, f)
+            f.write(header)
+            f.write(config_toml)
+        
         return True
     except Exception as e:
         sys.stderr.write(f"Error saving config: {e}\n")
@@ -181,12 +199,19 @@ def filter_files(collection_dir: str, config: Dict[str, Any]) -> List[str]:
 
 def get_extractor(filename: str, config: Dict[str, Any]) -> Optional[str]:
     """Find the appropriate extractor command for a file."""
-    extractors = config.get("extractors", {})
+    # First check custom extractors defined in config
+    custom_extractors = config.get("extractors", {})
 
-    for pattern, command in extractors.items():
+    # Try to match custom extractors first (allowing overrides)
+    for pattern, command in custom_extractors.items():
         if fnmatch.fnmatch(filename, pattern):
             return command
-
+    
+    # If no custom extractor matched, use the default extractors
+    for pattern, command in DEFAULT_EXTRACTORS.items():
+        if fnmatch.fnmatch(filename, pattern):
+            return command
+    
     return None
 
 
