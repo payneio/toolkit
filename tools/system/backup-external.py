@@ -139,6 +139,16 @@ def create_tar_archive(source_dir, tar_path):
         logger.error(f"Error creating tar archive: {e}")
         return False
 
+def get_free_space(path):
+    """Get free space in bytes on the filesystem containing path."""
+    try:
+        stat = os.statvfs(path)
+        # Available blocks * block size
+        return stat.f_bavail * stat.f_frsize
+    except Exception as e:
+        logger.error(f"Error checking free space: {e}")
+        return 0
+
 def transfer_to_external(source_path, destination_dir, date_str, retention):
     """Transfer a file to external destination."""
     try:
@@ -146,12 +156,26 @@ def transfer_to_external(source_path, destination_dir, date_str, retention):
         backup_date_dir = os.path.join(destination_dir, date_str)
         os.makedirs(backup_date_dir, exist_ok=True)
         
+        # Check if there's enough space on the destination
+        source_size = os.path.getsize(source_path)
+        free_space = get_free_space(destination_dir)
+        
+        # Add 5% buffer to required space
+        required_space = source_size * 1.05  # 5% buffer
+        
+        if free_space < required_space:
+            logger.error(f"Not enough space on destination drive.")
+            logger.error(f"Required: {required_space/1e9:.2f} GB, Available: {free_space/1e9:.2f} GB")
+            logger.error(f"Please free up at least {(required_space-free_space)/1e9:.2f} GB and try again.")
+            return False
+        
         # Get source file name
         source_name = os.path.basename(source_path)
         destination_path = os.path.join(backup_date_dir, source_name)
         
         # Transfer file using rsync
         logger.info(f"Transferring {source_path} to {destination_path}")
+        logger.info(f"File size: {source_size/1e9:.2f} GB, Free space: {free_space/1e9:.2f} GB")
         cmd = ["rsync", "-av", source_path, destination_path]
         subprocess.run(cmd, check=True)
         
