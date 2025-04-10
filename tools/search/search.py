@@ -217,8 +217,12 @@ def get_extractor(filename: str, config: Dict[str, Any]) -> Optional[str]:
 
 def extract_metadata(file_path: str, extractor_cmd: str) -> Dict[str, Any]:
     """Execute extractor and parse output as JSON."""
-    # Replace {input} with the file path
-    cmd = extractor_cmd.replace("{input}", file_path)
+    # Replace {input} with the properly quoted file path
+    # First, escape any single quotes in the path
+    escaped_path = file_path.replace("'", "'\\''")
+    # Then wrap in single quotes to handle spaces and special characters
+    quoted_path = f"'{escaped_path}'"
+    cmd = extractor_cmd.replace("{input}", quoted_path)
 
     try:
         # Run the extractor command
