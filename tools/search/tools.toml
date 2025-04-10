@@ -1,0 +1,6 @@
+[tool]
+command = "search"
+script = "search/search.py"
+description = "Manage self-contained searchable collections of files"
+version = "1.0.0"
+system_dependencies = []

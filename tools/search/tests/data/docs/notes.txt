@@ -1,0 +1,11 @@
+RESEARCH NOTES
+
+These are some notes about machine learning techniques.
+
+Neural networks have become very popular in recent years.
+Transformers are especially effective for NLP tasks.
+
+TODO:
+- Read more about reinforcement learning
+- Implement a simple CNN
+- Look into transfer learning techniques
