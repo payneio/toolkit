@@ -4,3 +4,24 @@ script = "search/search.py"
 description = "Manage self-contained searchable collections of files"
 version = "1.0.0"
 system_dependencies = []
+
+[tool]
+command = "text-extractor"
+script = "search/text_extractor.py"
+description = "Extract content and metadata from text files"
+version = "1.0.0"
+system_dependencies = []
+
+[tool]
+command = "pdf-extractor"
+script = "search/pdf_extractor.py"
+description = "Extract content and metadata from PDF files"
+version = "1.0.0"
+system_dependencies = []
+
+[tool]
+command = "docx-extractor"
+script = "search/docx_extractor.py"
+description = "Extract content and metadata from Word .docx files"
+version = "1.0.0"
+system_dependencies = ["pandoc"]

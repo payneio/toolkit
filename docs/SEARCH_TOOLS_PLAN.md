@@ -19,7 +19,7 @@ collection/
 ├── somefile.pdf
 └── .search/
     ├── config.toml        # Describes extractors, patterns, etc.
-    ├── cache/             # YAML/JSON metadata per source file
+    ├── cache/             # JSON metadata per source file
     ├── index/             # Tantivy index (created by system)
 ```
 
@@ -51,12 +51,12 @@ patterns = ["*.pdf", "*.mp4", "*.md"]
 patterns = ["draft_*", "*.bak"]
 
 [extractors]
-"*.pdf" = "pdf-extract --format yaml"
-"*.md"  = "md-extract --format yaml"
-"*.mp4" = "video-extract --output yaml"
+"*.pdf" = "pdf-extract --format json"
+"*.md"  = "md-extract --format json"
+"*.mp4" = "video-extract --output json"
 
 [output]
-format = "yaml"
+format = "json"
 directory = "cache"
 ```
 
@@ -74,8 +74,8 @@ Indexes or re-indexes all relevant files in one or more collections.
 3. For each matched file:
    - Determine matching extractor based on glob.
    - Execute extractor via shell, substituting `{input}` with file path.
-   - Capture stdout, parse as YAML or JSON.
-   - Save structured metadata to `.search/cache/filename.yaml` (optional).
+   - Capture stdout, parse as JSON.
+   - Save structured metadata to `.search/cache/filename.json` (optional).
    - Add document to `.search/index/` via Xapian.
 
 **Requirements:**
@@ -85,16 +85,19 @@ Indexes or re-indexes all relevant files in one or more collections.
 ### **Extractors**
 External CLI tools defined per file type. Must:
 - Accept an input file path.
-- Output structured data in YAML or JSON.
+- Output structured data in JSON.
 - Support `{input}` template substitution (system will handle it).
 
 **Example Output:**
-```yaml
-title: "Deep Learning for Genomics"
-tags: ["ai", "genomics"]
-content: "This paper discusses neural networks applied to DNA..."
-custom:
-  rating: 5
+```json
+{
+  "title": "Deep Learning for Genomics",
+  "tags": ["ai", "genomics"],
+  "content": "This paper discusses neural networks applied to DNA...",
+  "custom": {
+    "rating": 5
+  }
+}
 ```
 
 **Required fields for indexing:**
@@ -146,7 +149,7 @@ Each `.search/index/` holds a standalone Tantivy index.
 ---
 
 ## **Summary**
-This system builds modular, indexable file collections, each with their own config and extractor logic. Extractors are CLI tools that output YAML/JSON. The system handles indexing and search via Tantivy, storing everything locally for backup and portability. Tantivy provides a Rust-based, high-performance full-text search engine with excellent performance characteristics and Python bindings.
+This system builds modular, indexable file collections, each with their own config and extractor logic. Extractors are CLI tools that output JSON. The system handles indexing and search via Tantivy, storing everything locally for backup and portability. Tantivy provides a Rust-based, high-performance full-text search engine with excellent performance characteristics and Python bindings.
 
 Let me know if you'd like this formatted as a markdown doc or split into dev tickets.
 
