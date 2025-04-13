@@ -6,17 +6,6 @@ A modular, low-resource, local search system for files (PDFs, images, videos, et
 
 The `search` tool creates self-contained collections with their own configuration, extraction logic, and indexes. This allows for easy backup, sharing, and portability of searchable document collections.
 
-### Why Tantivy?
-
-Tantivy is a modern, high-performance search engine library written in Rust that offers several advantages:
-
-- **Performance**: Approximately 2x faster than Apache Lucene according to benchmarks
-- **Resource Efficiency**: Low memory footprint and minimal startup time (<10ms)
-- **Modern Design**: Written in Rust, providing memory safety and concurrent performance
-- **Feature Rich**: Supports complex queries, faceted search, and customizable tokenization
-- **Embeddable**: Can be embedded directly in applications without running a separate server
-- **Active Development**: Maintained by Quickwit and used in production by companies like Etsy
-
 ## Key Concepts
 
 ### Collection
@@ -215,25 +204,3 @@ $ search query "cat" --in ~/media
    ```bash
    search index --verbose ~/papers
    ```
-
-### Migrating from Xapian to Tantivy
-
-If you previously used the Xapian-based version of this tool, note these differences:
-
-1. **Reindexing Required**: You'll need to reindex your collections as the index format has changed
-2. **Installation**: Tantivy requires Rust if binary wheels aren't available, while Xapian required system packages
-3. **Tag Handling**: Tags are now implemented as facets rather than boolean terms
-4. **Query Syntax**: Tantivy's query syntax is similar but may have subtle differences
-5. **Performance**: Expect faster search and indexing performance in most cases
-
-To migrate an existing collection:
-```bash
-# Backup your collection first
-cp -r ~/papers ~/papers.bak
-
-# Remove the old index (cache can be kept)
-rm -rf ~/papers/.search/index
-
-# Reindex with the new Tantivy-based search tool
-search index --verbose ~/papers
-```
