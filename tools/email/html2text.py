@@ -123,7 +123,7 @@ class HTMLToTextParser(HTMLParser):
             self.in_list_item = False
         elif tag == 'a':
             if self.in_anchor and self.href and self.buffer:
-                if not self.href in self.buffer:
+                if self.href not in self.buffer:
                     self.buffer += f" [{self.href}]"
             self.in_anchor = False
         elif tag == 'pre':
@@ -165,7 +165,7 @@ class HTMLToTextParser(HTMLParser):
                 self.buffer += char
             else:
                 self.result.append(char)
-        except:
+        except Exception:
             pass
             
     def handle_charref(self, name):
@@ -179,7 +179,7 @@ class HTMLToTextParser(HTMLParser):
                 self.buffer += char
             else:
                 self.result.append(char)
-        except:
+        except Exception:
             pass
     
     def get_text(self):

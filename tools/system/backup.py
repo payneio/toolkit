@@ -19,9 +19,7 @@ import os
 import json
 import argparse
 import subprocess
-import datetime
 import logging
-from pathlib import Path
 
 # Constants
 DEFAULT_CONFIG_DIR = os.path.expanduser("~/.config/toolkit")
@@ -120,7 +118,7 @@ def run_backup_collect(args):
     
     logger.info(f"Running: {' '.join(cmd)}")
     try:
-        result = subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)
         logger.info("Local backup collection completed successfully")
         return True
     except subprocess.CalledProcessError as e:
@@ -145,7 +143,7 @@ def run_backup_external(args):
     
     logger.info(f"Running: {' '.join(cmd)}")
     try:
-        result = subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)
         logger.info("External backup transfer completed successfully")
         return True
     except subprocess.CalledProcessError as e:

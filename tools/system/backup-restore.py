@@ -26,11 +26,9 @@ import os
 import json
 import argparse
 import subprocess
-import datetime
 import logging
 import glob
 import tempfile
-from pathlib import Path
 
 # Constants
 DEFAULT_CONFIG_DIR = os.path.expanduser("~/.config/toolkit")
@@ -214,7 +212,7 @@ def restore_from_local(backup_dir, set_name, date_str, restore_path, target_path
     
     try:
         subprocess.run(cmd, check=True)
-        logger.info(f"Restore completed successfully")
+        logger.info("Restore completed successfully")
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Restore failed: {e}")
@@ -314,7 +312,7 @@ def verify_checksum(destination_dir, date_str):
         # Change back to original directory
         os.chdir(original_dir)
         
-        logger.info(f"Checksum verification passed")
+        logger.info("Checksum verification passed")
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Checksum verification failed: {e}")
@@ -401,8 +399,6 @@ def main():
                 logger.info("Backup verification successful")
                 # If path specified, also verify the specific path
                 if args.path and args.set:
-                    backup_date_dir = os.path.join(destination, args.date)
-                    tar_file = os.path.join(backup_date_dir, f"{args.set}-latest.tar")
                     if restore_from_external(destination, args.set, args.date, args.path, args.path, verify_only=True):
                         logger.info(f"Path verification successful: {args.path}")
                     else:

@@ -942,8 +942,10 @@ dependencies = [
     { name = "openai" },
     { name = "pymupdf", version = "1.24.11", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pymupdf", version = "1.25.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "pytest" },
     { name = "pyyaml" },
     { name = "requests" },
+    { name = "ruff" },
     { name = "tantivy", version = "0.22.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "tantivy", version = "0.22.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "toml" },
@@ -951,26 +953,19 @@ dependencies = [
     { name = "watchdog", version = "6.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.11.0" },
     { name = "openai", specifier = ">=1.6.0" },
     { name = "pymupdf", specifier = ">=1.24.11" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest", specifier = ">=7.0.0" },
     { name = "pyyaml", specifier = ">=6.0.0" },
     { name = "requests", specifier = ">=2.28.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.4" },
+    { name = "ruff", specifier = ">=0.11.4" },
     { name = "tantivy", specifier = ">=0.22.0" },
     { name = "toml", specifier = ">=0.10.2" },
     { name = "watchdog", specifier = ">=3.0.0" },
 ]
-provides-extras = ["dev"]
 
 [[package]]
 name = "tqdm"

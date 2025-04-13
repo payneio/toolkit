@@ -18,7 +18,6 @@ import subprocess
 from datetime import datetime
 import mimetypes
 from pathlib import Path
-import tempfile
 import re
 
 def get_file_metadata(file_path):
@@ -30,7 +29,7 @@ def get_file_metadata(file_path):
     mtime = datetime.fromtimestamp(stat.st_mtime).isoformat()
     try:
         ctime = datetime.fromtimestamp(stat.st_ctime).isoformat()
-    except:
+    except Exception:
         ctime = mtime  # Fallback if creation time not available
     
     # Get mime type

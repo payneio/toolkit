@@ -13,7 +13,7 @@ TARGET_MAN_DIR := $(HOME)/.local/share/man/man1
 TOOLS_TOML := $(shell find $(TOOLS_DIR) -name "tools.toml")
 
 # Default target
-all: bin install build
+all: build bin install
 
 # Install links
 install: install-links

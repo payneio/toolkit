@@ -20,10 +20,7 @@ import argparse
 import subprocess
 import datetime
 import logging
-import glob
 import shutil
-import tempfile
-from pathlib import Path
 
 # Constants
 DEFAULT_CONFIG_DIR = os.path.expanduser("~/.config/toolkit")
@@ -164,7 +161,7 @@ def transfer_to_external(source_path, destination_dir, date_str, retention):
         required_space = source_size * 1.05  # 5% buffer
         
         if free_space < required_space:
-            logger.error(f"Not enough space on destination drive.")
+            logger.error("Not enough space on destination drive.")
             logger.error(f"Required: {required_space/1e9:.2f} GB, Available: {free_space/1e9:.2f} GB")
             logger.error(f"Please free up at least {(required_space-free_space)/1e9:.2f} GB and try again.")
             return False

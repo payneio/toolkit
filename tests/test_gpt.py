@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 import json
 from io import StringIO
 
-sys.path.append('../tools/gpt')
+sys.path.append('./tools/gpt')
 import gpt
 
 class TestGPT(unittest.TestCase):

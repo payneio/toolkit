@@ -10,10 +10,7 @@ They are meant to be used as a demonstration of the tool's functionality.
 """
 import os
 import sys
-import tempfile
-import subprocess
 import shutil
-from pathlib import Path
 
 # Add parent directory to path so we can import the search module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

@@ -42,7 +42,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional
 
 import toml
 
@@ -461,7 +461,7 @@ def perform_search(
                         # If we have tags in metadata, extract them
                         if "tags" in metadata:
                             tags = metadata["tags"]
-                    except:
+                    except Exception:
                         pass
 
                 # Skip documents that don't match tag filter
@@ -586,7 +586,7 @@ def cmd_index(args: argparse.Namespace) -> int:
 
     if not collections:
         sys.stderr.write(
-            f"Error: No search collections found in the specified directories.\n"
+            "Error: No search collections found in the specified directories.\n"
         )
         return 1
 

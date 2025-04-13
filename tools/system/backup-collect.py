@@ -20,7 +20,6 @@ import argparse
 import subprocess
 import datetime
 import logging
-from pathlib import Path
 
 # Constants
 DEFAULT_CONFIG_DIR = os.path.expanduser("~/.config/toolkit")
@@ -128,7 +127,6 @@ def run_backup(source, backup_dir, date_str, incremental=True):
             rsync_cmd.append(dated_dir + '/')
         else:
             # For files, preserve the full path structure
-            parent_dir = os.path.dirname(expanded_path)
             rsync_cmd.extend(['-R', expanded_path])  # -R preserves relative path
             rsync_cmd.append(dated_dir + '/')
         
@@ -172,7 +170,6 @@ def cleanup_old_backups(source, backup_dir, retention):
     
     try:
         # Find all dated backups for this source
-        backup_pattern = f"{source_name}-20*"  # Match dates starting with 20xx
         backups = sorted([
             d for d in os.listdir(backup_dir) 
             if os.path.isdir(os.path.join(backup_dir, d)) and 
