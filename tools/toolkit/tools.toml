@@ -1,4 +1,4 @@
-[tool]
+[[tool]]
 command = "toolkit"
 script = "toolkit/toolkit.py"
 description = "Manage and discover toolkit utilities"

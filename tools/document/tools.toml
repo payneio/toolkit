@@ -1,11 +1,11 @@
-[tool]
+[[tool]]
 command = "docx2md"
 script = "document/docx2md.py"
 description = "Convert Word .docx files to Markdown"
 version = "1.0.0"
 system_dependencies = ["pandoc"]
 
-[tool]
+[[tool]]
 command = "pdf2md"
 script = "document/pdf2md.py"
 description = "Convert PDF files to Markdown"

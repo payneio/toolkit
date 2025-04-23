@@ -1,10 +1,10 @@
-[tool]
+[[tool]]
 command = "protonmail"
 script = "email/protonmail.py"
 description = "Access and manage ProtonMail emails via Bridge"
 version = "1.0.0"
 
-[tool.html2text]
+[[tool]]
 command = "html2text"
 script = "email/html2text.py"
 description = "Convert HTML content to plain text"
