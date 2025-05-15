@@ -118,11 +118,14 @@ In case of system failure, follow these steps to restore your system:
 2. Install basic tools: `sudo apt install rsync tar`
 3. Download and install toolkit
 4. Restore configuration files:
+
    ```bash
    backup-restore --source external --set config --date YYYY-MM-DD --path ~/.config
    backup-restore --source external --set config --date YYYY-MM-DD --path ~/env.sh
    ```
+
 5. Restore data directory:
+
    ```bash
    backup-restore --source external --set data --date YYYY-MM-DD --path /data
    ```
