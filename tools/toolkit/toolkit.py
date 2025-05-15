@@ -4,13 +4,14 @@ toolkit: Manage and display information about toolkit utilities
 
 Toolkit helps you discover and work with the available utilities in your toolkit.
 
-Usage: toolkit [options]
+Usage: toolkit [command] [options]
 
 Examples:
   toolkit                  # Show help information
-  toolkit --list           # List all available tools
-  toolkit --info docx2md   # Show detailed information about a specific tool
-  toolkit --json           # Output tool information in JSON format
+  toolkit list             # List all available tools
+  toolkit list --json      # List all available tools in JSON format
+  toolkit info docx2md     # Show detailed information about a specific tool
+  toolkit info docx2md --json  # Show detailed information in JSON format
 """
 import sys
 import os
@@ -119,32 +120,59 @@ def print_tool_info(tool_name, tools):
     
     return 0
 
+def print_tool_info_json(tool_name, tools):
+    """Return detailed information about a specific tool in JSON format"""
+    tool = next((t for t in tools if t["command"] == tool_name), None)
+    
+    if not tool:
+        print(json.dumps({"error": f"Tool '{tool_name}' not found"}), file=sys.stderr)
+        return 1
+    
+    print(json.dumps(tool, indent=2))
+    return 0
+
 def main():
     parser = argparse.ArgumentParser(
         description="Manage and display information about toolkit utilities",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__.split("\n\n", 1)[1]  # Use the docstring as extended help
     )
-    parser.add_argument('-l', '--list', action='store_true', help="List all available tools")
-    parser.add_argument('-i', '--info', metavar='TOOL', help="Show detailed information about a specific tool")
-    parser.add_argument('-j', '--json', action='store_true', help="Output in JSON format")
+    
+    # Create subparsers for commands
+    subparsers = parser.add_subparsers(dest='command', help='Command to execute', required=False)
+    
+    # List command
+    list_parser = subparsers.add_parser('list', help="List all available tools")
+    list_parser.add_argument('-v', '--verbose', action='store_true', help="Show verbose information")
+    list_parser.add_argument('--json', action='store_true', help="Output in JSON format")
+    
+    # Info command
+    info_parser = subparsers.add_parser('info', help="Show detailed information about a specific tool")
+    info_parser.add_argument('tool', help="Tool name")
+    info_parser.add_argument('--json', action='store_true', help="Output in JSON format")
+    
+    # Global options
     parser.add_argument('-v', '--verbose', action='store_true', help="Show verbose information")
     parser.add_argument('--version', action='version', version='toolkit 1.0.0')
-    args = parser.parse_args()
     
+    args = parser.parse_args()
     tools = get_tools_info()
     
-    if args.json:
-        # Output in JSON format
-        json.dump(tools, sys.stdout, indent=2)
-        print()  # Add newline
-        return 0
+    # Process based on command
+    if args.command == 'info':
+        if getattr(args, 'json', False):
+            return print_tool_info_json(args.tool, tools)
+        else:
+            return print_tool_info(args.tool, tools)
     
-    if args.info:
-        return print_tool_info(args.info, tools)
-    
-    if args.list or len(sys.argv) == 1:
-        print_tool_list(tools, args.verbose)
+    # Default to list if no command or explicit 'list' command
+    if args.command is None or args.command == 'list':
+        if getattr(args, 'json', False):
+            # Output all tools in JSON format
+            json.dump(tools, sys.stdout, indent=2)
+            print()  # Add newline
+        else:
+            print_tool_list(tools, getattr(args, 'verbose', False))
     
     return 0
 
