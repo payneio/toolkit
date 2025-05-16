@@ -52,7 +52,7 @@ bin:
 	@for toml in $(TOOLS_TOML); do \
 		category=$$(basename $$(dirname $$toml)); \
 		echo "Processing $$category tools..."; \
-		grep -A10 '^\[tool\]' $$toml | while IFS= read -r line; do \
+		grep -A10 '^\[\[tool\]\]' $$toml | while IFS= read -r line; do \
 			case "$$line" in \
 				*"command ="*) \
 					cmd=$$(echo "$$line" | sed -E 's/command *= *"?([^"]*)"?/\1/') \
