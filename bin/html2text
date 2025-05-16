@@ -6,7 +6,7 @@ SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 TOOLKIT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Tool information 
-TOOL_SCRIPT="$TOOLKIT_DIR/tools/email/html2text.py"
+TOOL_SCRIPT="$TOOLKIT_DIR/tools/document/html2text.py"
 
 # Check if the tool script exists
 if [ ! -f "$TOOL_SCRIPT" ]; then
