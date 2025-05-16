@@ -11,3 +11,9 @@ script = "document/pdf2md.py"
 description = "Convert PDF files to Markdown"
 version = "1.0.0"
 system_dependencies = ["pandoc", "poppler-utils"]
+
+[[tool]]
+command = "html2text"
+script = "document/html2text.py"
+description = "Convert HTML content to plain text"
+version = "1.0.0"
