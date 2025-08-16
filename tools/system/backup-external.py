@@ -26,6 +26,7 @@ import shutil
 DEFAULT_CONFIG_DIR = os.path.expanduser("~/.config/toolkit")
 DEFAULT_CONFIG_FILE = os.path.join(DEFAULT_CONFIG_DIR, "backup-config.json")
 DEFAULT_BACKUP_DIR = os.environ.get("DBACKUP", "/data/backup")
+DEFAULT_WORK_DIR = "/tmp/backup-external-work"
 DEFAULT_EXTERNAL_LOCATIONS = [
     "/media/payne/T9/backups",
     "/mnt/backup",
@@ -100,9 +101,22 @@ def find_available_destination(destinations):
     logger.warning("No available external destinations found")
     return None
 
-def create_tar_archive(source_dir, tar_path):
+def create_tar_archive(source_dir, tar_path, resume=False):
     """Create a tar archive of the source directory."""
     try:
+        # Check if tar already exists and resume is enabled
+        if resume and os.path.exists(tar_path):
+            logger.info(f"Found existing tar archive: {tar_path}")
+            # Verify it's not corrupted by checking if it's readable
+            try:
+                cmd = ["tar", "-tf", tar_path]
+                result = subprocess.run(cmd, capture_output=True, check=True)
+                logger.info(f"Resuming with existing archive: {tar_path}")
+                return True
+            except subprocess.CalledProcessError:
+                logger.warning(f"Existing tar archive appears corrupted, recreating: {tar_path}")
+                os.remove(tar_path)
+        
         # Check if the source exists and is a directory or symlink to directory
         if not os.path.exists(source_dir):
             logger.warning(f"Source directory does not exist: {source_dir}")
@@ -124,7 +138,8 @@ def create_tar_archive(source_dir, tar_path):
         # Create tar archive with exclusion for the backup tar file we're creating
         logger.info(f"Creating tar archive: {tar_path}")
         cmd = ["tar", "-cf", tar_path, 
-               "--exclude=" + os.path.dirname(tar_path), # Exclude the temp directory holding our tar file 
+               "--exclude=" + os.path.dirname(tar_path), # Exclude the work directory holding our tar file 
+               "--exclude=lost+found",
                "-C", source_parent, source_name]
         subprocess.run(cmd, check=True)
         logger.info(f"Archive created successfully: {tar_path}")
@@ -283,6 +298,10 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true',
                         help="Enable verbose output")
     parser.add_argument('--version', action='version', version='backup-external 1.0.0')
+    parser.add_argument('--resume', action='store_true',
+                        help="Resume using existing tar files in work directory")
+    parser.add_argument('--work-dir', 
+                        help=f"Work directory for tar files (default: {DEFAULT_WORK_DIR})")
     args = parser.parse_args()
     
     # Set verbosity
@@ -326,15 +345,19 @@ def main():
     if not os.path.exists(data_dir):
         logger.error(f"Data directory does not exist: {data_dir}")
         return 1
-        
-    # Create temp directory for tar file to avoid recursion
-    import tempfile
-    temp_dir = tempfile.mkdtemp()
-    tar_file = os.path.join(temp_dir, "data-full.tar")
+    
+    # Use work directory instead of temp directory
+    work_dir = args.work_dir or DEFAULT_WORK_DIR
+    os.makedirs(work_dir, exist_ok=True)
+    tar_file = os.path.join(work_dir, "data-full.tar")
     success = True
     
-    logger.info(f"Creating tar archive of entire data directory in temp location: {tar_file}")
-    if create_tar_archive(data_dir, tar_file):
+    logger.info(f"Using work directory: {work_dir}")
+    if args.resume:
+        logger.info("Resume mode enabled - will reuse existing tar files if valid")
+    
+    logger.info(f"Creating tar archive of entire data directory: {tar_file}")
+    if create_tar_archive(data_dir, tar_file, resume=args.resume):
         tar_files = [tar_file]
     else:
         logger.error("Failed to create tar archive of data directory")
@@ -346,22 +369,29 @@ def main():
         logger.info(f"Transferring {len(tar_files)} archives to external destination")
         
         # Transfer each tar file
+        transfer_success = True
         for tar_file in tar_files:
             if not transfer_to_external(tar_file, destination, date_str, retention):
+                transfer_success = False
                 success = False
         
-        # Create verification file
-        create_verification_file(tar_files, destination, date_str)
+        # Only cleanup work directory if transfer was successful
+        if transfer_success:
+            # Create verification file
+            create_verification_file(tar_files, destination, date_str)
+            
+            # Cleanup - remove work directory and tar files after successful transfer
+            try:
+                shutil.rmtree(work_dir, ignore_errors=True)
+                logger.info(f"Removed work directory after successful transfer: {work_dir}")
+            except Exception as e:
+                logger.warning(f"Could not remove work directory {work_dir}: {e}")
+        else:
+            logger.info(f"Preserving work directory due to transfer failure: {work_dir}")
+            logger.info(f"Run with --resume to reuse existing tar files")
     else:
         logger.error("No tar archives were created. External backup failed.")
         success = False
-    
-    # Cleanup - remove temporary directory and tar files
-    try:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        logger.info(f"Removed temporary directory: {temp_dir}")
-    except Exception as e:
-        logger.warning(f"Could not remove temporary directory {temp_dir}: {e}")
     
     if success:
         logger.info("External backup completed successfully")
