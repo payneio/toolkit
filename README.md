@@ -70,6 +70,29 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
    ```
 
+### System Dependencies
+
+Some tools require system packages to be installed separately:
+
+#### Document Tools
+
+- **md2pdf**: Requires LaTeX for PDF generation
+  ```bash
+  sudo apt install texlive-latex-base texlive-latex-extra
+  ```
+
+- **pdf2md**: Requires poppler-utils and pandoc
+  ```bash
+  sudo apt install poppler-utils pandoc
+  ```
+
+- **docx2md**: Requires pandoc
+  ```bash
+  sudo apt install pandoc
+  ```
+
+These dependencies are listed in each tool's `tools.toml` configuration under the `system_dependencies` field.
+
 ## Creating New Utilities
 
 The toolkit provides a simple workflow for creating new utilities using the `make` system.

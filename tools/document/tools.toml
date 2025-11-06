@@ -17,3 +17,10 @@ command = "html2text"
 script = "document/html2text.py"
 description = "Convert HTML content to plain text"
 version = "1.0.0"
+
+[[tool]]
+command = "md2pdf"
+script = "document/md2pdf.py"
+description = "Convert Markdown files to PDF"
+version = "1.0.0"
+system_dependencies = ["pandoc", "texlive-latex-base"]
