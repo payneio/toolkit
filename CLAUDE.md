@@ -3,17 +3,17 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build Commands
-- Build and install tools: `make all` (runs `make build && make bin && make install`)
-- Install tool dependencies with `uv`: `make build` 
-- Create tool executable: `make bin`
-- Install tool executables (symlinks to `~/.local/bin`): `make install`
+- Build and install tools: `make all` (installs with uv tool install)
+- Install tools: `make install` or `uv tool install --editable .`
+- Uninstall tools: `make uninstall` or `uv tool uninstall toolkit`
+- Sync dependencies: `make build` or `uv sync`
 - Lint code: `make check` or `uvx ruff check`
-- Run all tests: `uv run pytest -v`
+- Run all tests: `make test` or `uv run pytest -v`
 - Run specific tests: `uv run pytest tests/test_gpt.py -v`
 - Run single test: `uv run pytest tests/test_gpt.py::TestGPT::test_generate_text -v`
-- Create new tool: `make new-tool name=toolname`
+- Create new tool: `make new-tool name=toolname` (then add to pyproject.toml [project.scripts] and run `make install`)
 
-After a tool is installed, it can be used from the command line in any directory.
+After tools are installed with `uv tool install`, they are available system-wide in your PATH.
 
 ## Code Style Guidelines
 - Imports: Standard library first, then third-party, then local modules. Don't put imports inside blocks, keep them at the top.

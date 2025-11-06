@@ -49,7 +49,7 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - [UV](https://github.com/astral-sh/uv) package manager
 
 ### Installation
@@ -57,18 +57,20 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 1. Clone this repository:
    ```bash
    git clone https://github.com/yourusername/toolkit.git ~/toolkit
+   cd ~/toolkit
    ```
 
-2. Build and install tools:
+2. Install with uv:
    ```bash
-   cd ~/toolkit
    make all
    ```
 
-3. Ensure `~/.local/bin` is in your PATH:
+   Or directly with uv:
    ```bash
-   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   uv tool install --editable .
    ```
+
+That's it! All tools are now available in your PATH.
 
 ### System Dependencies
 
@@ -110,24 +112,18 @@ This will:
 1. Create the tool directory structure
 2. Add a template Python script with proper docstrings
 3. Create the tools.toml configuration file
-4. Generate the man page
-5. Create the bin launcher script
+4. Remind you to add the entry to pyproject.toml
+
+After creating a new tool, you must add it to the `[project.scripts]` section in [pyproject.toml](pyproject.toml) and run `make install`.
 
 ## Tools Configuration System
 
-The toolkit uses TOML configuration files to define and manage tools. This approach provides several advantages:
+Tools are defined using Python's standard `[project.scripts]` configuration in [pyproject.toml](pyproject.toml), which allows UV to install them as executable commands.
 
-1. **Single Source of Truth**: Tool metadata is stored in one place
-2. **Automation**: Automatically generate launcher scripts and man pages
-3. **Discoverability**: Tools can be discovered and documented programmatically
-4. **Maintainability**: Easy to update or add information about tools
-
-### Tool Configuration File (tools.toml)
-
-Each tool category directory includes a `tools.toml` configuration file that defines one or more tools:
+Each tool category also includes a `tools.toml` configuration file for metadata:
 
 ```toml
-[tool]
+[[tool]]
 command = "mytool"
 script = "mytool/mytool.py"
 description = "Description of the tool"
@@ -135,21 +131,7 @@ version = "1.0.0"
 system_dependencies = ["optional-system-dependency"]
 ```
 
-Fields in the tools.toml file:
-
-| Field | Description |
-|-------|-------------|
-| `command` | The command name that will be used to invoke the tool |
-| `script` | Path to the Python script (relative to tools directory) |
-| `description` | Short description of what the tool does |
-| `version` | Tool version number |
-| `system_dependencies` | List of system dependencies (not Python packages) |
-
-This configuration is used by the `make` system to:
-
-1. Generate bin launcher scripts that handle path resolution and dependency management
-2. Create man pages with consistent formatting
-3. Provide information to the `toolkit` discovery command
+The `tools.toml` files are used for documentation and the `toolkit` discovery command. The actual installation is handled by the `[project.scripts]` section in pyproject.toml.
 
 ### Multiple Tools in One Category
 
