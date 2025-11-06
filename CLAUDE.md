@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Run all tests: `make test` or `uv run pytest -v`
 - Run specific tests: `uv run pytest tests/test_gpt.py -v`
 - Run single test: `uv run pytest tests/test_gpt.py::TestGPT::test_generate_text -v`
-- Create new tool: `make new-tool name=toolname` (then add to pyproject.toml [project.scripts] and run `make install`)
+- Create new tool: `toolkit create toolname` or `toolkit create toolname --category document` (auto-updates pyproject.toml)
 
 After tools are installed with `uv tool install`, they are available system-wide in your PATH.
 

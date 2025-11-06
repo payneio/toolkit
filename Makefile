@@ -50,53 +50,17 @@ clean:
 	@echo "Cleanup complete."
 
 # Generate template for a new tool
+# Usage: make new-tool name=toolname [category=existing-category]
 new-tool:
 	@if [ -z "$(name)" ]; then \
-		echo "Error: Tool name not specified. Use 'make new-tool name=toolname'"; \
+		echo "Error: Tool name not specified."; \
+		echo "Usage:"; \
+		echo "  make new-tool name=toolname                    # Create new category"; \
+		echo "  make new-tool name=toolname category=document  # Add to existing category"; \
 		exit 1; \
 	fi
-	@echo "Creating new tool: $(name)"
-	@mkdir -p $(TOOLS_DIR)/$(name)
-
-	# Create __init__.py
-	@touch $(TOOLS_DIR)/$(name)/__init__.py
-
-	# Create Python script template
-	@echo '#!/usr/bin/env python3' > $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '"""' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '$(name): Description' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo 'Usage: $(name) [options]' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '"""' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo 'import sys' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo 'import argparse' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo 'def main():' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    parser = argparse.ArgumentParser(description="Tool description")' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    parser.add_argument("--version", action="version", version="$(name) 1.0.0")' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    args = parser.parse_args()' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    ' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    # Your code here' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    print("Hello from $(name)")' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    ' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    return 0' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo 'if __name__ == "__main__":' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@echo '    sys.exit(main())' >> $(TOOLS_DIR)/$(name)/$(name).py
-	@chmod +x $(TOOLS_DIR)/$(name)/$(name).py
-
-	# Create tools.toml config
-	@echo '[[tool]]' > $(TOOLS_DIR)/$(name)/tools.toml
-	@echo 'command = "$(name)"' >> $(TOOLS_DIR)/$(name)/tools.toml
-	@echo 'script = "$(name)/$(name).py"' >> $(TOOLS_DIR)/$(name)/tools.toml
-	@echo 'description = "A simple utility"' >> $(TOOLS_DIR)/$(name)/tools.toml
-	@echo 'version = "1.0.0"' >> $(TOOLS_DIR)/$(name)/tools.toml
-	@echo 'system_dependencies = []' >> $(TOOLS_DIR)/$(name)/tools.toml
-
-	@echo "Created new tool: $(TOOLS_DIR)/$(name)/$(name).py"
-	@echo "Created config:   $(TOOLS_DIR)/$(name)/tools.toml"
-	@echo ""
-	@echo "IMPORTANT: Add the following to pyproject.toml [project.scripts] section:"
-	@echo "$(name) = \"tools.$(name).$(name):main\""
-	@echo ""
-	@echo "Then run: make install"
+	@if [ -z "$(category)" ]; then \
+		uv run python -m tools.toolkit.toolkit create $(name); \
+	else \
+		uv run python -m tools.toolkit.toolkit create $(name) --category $(category); \
+	fi
