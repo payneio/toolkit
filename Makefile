@@ -48,19 +48,3 @@ clean:
 	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	@echo "Cleanup complete."
-
-# Generate template for a new tool
-# Usage: make new-tool name=toolname [category=existing-category]
-new-tool:
-	@if [ -z "$(name)" ]; then \
-		echo "Error: Tool name not specified."; \
-		echo "Usage:"; \
-		echo "  make new-tool name=toolname                    # Create new category"; \
-		echo "  make new-tool name=toolname category=document  # Add to existing category"; \
-		exit 1; \
-	fi
-	@if [ -z "$(category)" ]; then \
-		uv run python -m tools.toolkit.toolkit create $(name); \
-	else \
-		uv run python -m tools.toolkit.toolkit create $(name) --category $(category); \
-	fi

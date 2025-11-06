@@ -261,19 +261,28 @@ if __name__ == "__main__":
 
     # Update pyproject.toml
     pyproject_file = toolkit_root / "pyproject.toml"
-    if update_pyproject(pyproject_file, name, module_path):
+    pyproject_updated = update_pyproject(pyproject_file, name, module_path)
+
+    if pyproject_updated:
         print(f"Updated {pyproject_file.relative_to(toolkit_root)}")
-        print()
-        print("Tool created successfully!")
-        print(f"Run 'uv tool install --editable .' to install the tool.")
+
+    print()
+    print("✓ Tool created successfully!")
+    print()
+    print("Next steps:")
+    print(f"  1. Edit the implementation: {script_file.relative_to(toolkit_root)}")
+    print(f"  2. Update metadata (optional): {toml_file.relative_to(toolkit_root)}")
+
+    if not pyproject_updated:
+        print(f"  3. Add to pyproject.toml: {name} = \"{module_path}:main\"")
+        print(f"  4. Install: cd {toolkit_root} && uv tool install --editable .")
+        print(f"  5. Test: {name} --help")
     else:
-        print()
-        print("Tool files created successfully!")
-        print()
-        print("IMPORTANT: Add the following to pyproject.toml [project.scripts] section:")
-        print(f'{name} = "{module_path}:main"')
-        print()
-        print("Then run: uv tool install --editable .")
+        print(f"  3. Install: cd {toolkit_root} && uv tool install --reinstall --editable .")
+        print(f"  4. Test: {name} --help")
+
+    print()
+    print(f"The tool will be available as '{name}' command after installation.")
 
     return 0
 
