@@ -44,7 +44,6 @@ def create_default_config(config_path):
                 "name": "config",
                 "paths": [
                     os.path.expanduser("~/.config"),
-                    os.path.expanduser("~/env.sh"),
                 ],
                 "exclusions": [
                     os.path.expanduser("~/.config/Code/Cache/*"),
@@ -151,12 +150,13 @@ def run_backup(source, backup_dir, date_str, incremental=True):
     try:
         # Move previous latest to previous if it exists
         if os.path.exists(latest_dir) and os.path.islink(latest_dir):
-            if os.path.exists(previous_dir):
+            # Remove existing previous symlink first
+            if os.path.exists(previous_dir) or os.path.islink(previous_dir):
                 os.unlink(previous_dir)
             os.symlink(os.readlink(latest_dir), previous_dir)
 
         # Update latest symlink
-        if os.path.exists(latest_dir):
+        if os.path.exists(latest_dir) or os.path.islink(latest_dir):
             os.unlink(latest_dir)
         os.symlink(os.path.basename(dated_dir), latest_dir)
         logger.info(f"Updated symlinks for {source_name}")
@@ -278,7 +278,7 @@ def main():
         cleanup_old_backups(source, backup_dir, retention)
 
     if success:
-        logger.info("All backups completed successfully")
+        logger.info("✅ All backups completed successfully")
         return 0
     else:
         logger.error("One or more backups failed")
