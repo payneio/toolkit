@@ -28,8 +28,16 @@ build:
 
 # Run linting checks
 check:
-	@echo "Running Ruff checks..."
-	uvx ruff check
+	@echo "Formatting code with ruff..."
+	uv run ruff format .
+	
+	@echo "Linting code with ruff..."
+	uv run ruff check . --fix
+	
+	@echo "Type-checking code with pyright..."
+	uv run pyright
+
+	@echo "All checks passed!"
 
 # Run tests
 test:

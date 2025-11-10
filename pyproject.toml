@@ -20,6 +20,7 @@ dependencies = [
   "mdformat>=0.7.17",
   "browser-use>=0.1.41",
   "python-dotenv>=1.1.0",
+  "pyright>=1.1.407",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install tools: `make install` or `uv tool install --editable .`
 - Uninstall tools: `make uninstall` or `uv tool uninstall toolkit`
 - Sync dependencies: `make build` or `uv sync`
-- Lint code: `make check` or `uvx ruff check`
+- Lint code: `make check` (should be run to confirm new code is good)
 - Run all tests: `make test` or `uv run pytest -v`
 - Run specific tests: `uv run pytest tests/test_gpt.py -v`
 - Run single test: `uv run pytest tests/test_gpt.py::TestGPT::test_generate_text -v`
