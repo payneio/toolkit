@@ -146,7 +146,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Complete backup system (both local and external phases)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__.split("\n\n", 1)[1],  # Use the docstring as extended help
+        epilog=__doc__.split("\n\n", 1)[1]
+        if __doc__
+        else ""
+        if __doc__
+        else "",  # Use the docstring as extended help
     )
     parser.add_argument(
         "-c", "--config", help=f"Path to config file (default: {DEFAULT_CONFIG_FILE})"

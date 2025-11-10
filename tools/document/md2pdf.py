@@ -20,6 +20,7 @@ Options:
   --margin SIZE        Set page margins (default: 1in). Examples: 1in, 2cm, 20mm
   --font-size SIZE     Set base font size (default: 11pt). Examples: 10pt, 12pt
 """
+
 import sys
 import os
 import subprocess
@@ -28,11 +29,17 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="Convert Markdown files to PDF")
-    parser.add_argument('input_file', nargs='?', help="Input Markdown file (or read from stdin)")
-    parser.add_argument('-o', '--output', help="Output PDF file (default: <input_basename>.pdf)")
-    parser.add_argument('--toc', action='store_true', help="Include table of contents")
-    parser.add_argument('--margin', default='1in', help="Page margins (default: 1in)")
-    parser.add_argument('--font-size', default='11pt', help="Base font size (default: 11pt)")
+    parser.add_argument(
+        "input_file", nargs="?", help="Input Markdown file (or read from stdin)"
+    )
+    parser.add_argument(
+        "-o", "--output", help="Output PDF file (default: <input_basename>.pdf)"
+    )
+    parser.add_argument("--toc", action="store_true", help="Include table of contents")
+    parser.add_argument("--margin", default="1in", help="Page margins (default: 1in)")
+    parser.add_argument(
+        "--font-size", default="11pt", help="Base font size (default: 11pt)"
+    )
     args = parser.parse_args()
 
     # Determine input source.
@@ -50,7 +57,10 @@ def main():
     else:
         # Reading from stdin
         if not args.output:
-            print("Error: When reading from stdin, you must specify an output file with -o", file=sys.stderr)
+            print(
+                "Error: When reading from stdin, you must specify an output file with -o",
+                file=sys.stderr,
+            )
             return 1
         input_file = None
         output_file = args.output
@@ -64,17 +74,27 @@ def main():
         else:
             pandoc_command.append("-")  # Read from stdin
 
-        pandoc_command.extend([
-            "-f", "markdown",
-            "-t", "pdf",
-            "-o", output_file,
-            "--pdf-engine=pdflatex",
-            f"-V", f"geometry:margin={args.margin}",
-            f"-V", f"fontsize={args.font_size}",
-            "-V", "colorlinks=true",
-            "-V", "linkcolor=blue",
-            "-V", "urlcolor=blue",
-        ])
+        pandoc_command.extend(
+            [
+                "-f",
+                "markdown",
+                "-t",
+                "pdf",
+                "-o",
+                output_file,
+                "--pdf-engine=pdflatex",
+                "-V",
+                f"geometry:margin={args.margin}",
+                "-V",
+                f"fontsize={args.font_size}",
+                "-V",
+                "colorlinks=true",
+                "-V",
+                "linkcolor=blue",
+                "-V",
+                "urlcolor=blue",
+            ]
+        )
 
         # Add table of contents if requested.
         if args.toc:
@@ -82,12 +102,12 @@ def main():
             pandoc_command.extend(["--toc-depth", "3"])
 
         # Run pandoc conversion.
-        result = subprocess.run(
+        subprocess.run(
             pandoc_command,
             check=True,
             capture_output=True,
             text=True,
-            input=None if input_file else sys.stdin.read()
+            input=None if input_file else sys.stdin.read(),
         )
 
         # Print success message to stderr.
@@ -100,7 +120,10 @@ def main():
             print(e.stderr, file=sys.stderr)
         return 1
     except FileNotFoundError:
-        print("Error: pandoc is not installed. Please install it with 'apt install pandoc texlive-latex-base'", file=sys.stderr)
+        print(
+            "Error: pandoc is not installed. Please install it with 'apt install pandoc texlive-latex-base'",
+            file=sys.stderr,
+        )
         return 1
 
 

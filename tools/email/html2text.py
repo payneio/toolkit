@@ -226,7 +226,8 @@ class HTMLToTextParser(HTMLParser):
 
                 if content.startswith("• ") or re.match(r"^\d+\.\s", content):
                     # It's a list item, preserve the marker and indent rest of the paragraph
-                    marker = re.match(r"^([•\d]+\.?\s+)", content).group(1)
+                    match = re.match(r"^([•\d]+\.?\s+)", content)
+                    marker = match.group(1) if match else "• "
                     remaining = content[len(marker) :]
 
                     # Set up custom wrapper for indented text
@@ -279,7 +280,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Convert HTML content to plain text",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__.split("\n\n", 1)[1],
+        epilog=__doc__.split("\n\n", 1)[1] if __doc__ else "",
     )
 
     parser.add_argument("file", nargs="?", help="HTML file to convert (default: stdin)")

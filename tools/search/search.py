@@ -48,17 +48,18 @@ import toml
 
 # Try to import Tantivy, but don't fail immediately if not available
 # This allows --help and other non-search operations to work without Tantivy
+tantivy_available = False
 try:
-    import tantivy
+    import tantivy  # type: ignore
 
-    TANTIVY_AVAILABLE = True
+    tantivy_available = True
 except ImportError:
-    TANTIVY_AVAILABLE = False
+    tantivy = None  # type: ignore
 
 
 def check_tantivy():
     """Check if Tantivy is available and exit if not."""
-    if not TANTIVY_AVAILABLE:
+    if not tantivy_available:
         print(
             "Error: Required Tantivy Python bindings not found. Please install them with:"
         )
@@ -140,12 +141,12 @@ def save_config(collection_dir: str, config: Dict[str, Any]) -> bool:
 """
         # Format the config as TOML
         config_toml = toml.dumps(config)
-        
+
         # Write the file with header
         with open(config_path, "w") as f:
             f.write(header)
             f.write(config_toml)
-        
+
         return True
     except Exception as e:
         sys.stderr.write(f"Error saving config: {e}\n")
@@ -206,12 +207,12 @@ def get_extractor(filename: str, config: Dict[str, Any]) -> Optional[str]:
     for pattern, command in custom_extractors.items():
         if fnmatch.fnmatch(filename, pattern):
             return command
-    
+
     # If no custom extractor matched, use the default extractors
     for pattern, command in DEFAULT_EXTRACTORS.items():
         if fnmatch.fnmatch(filename, pattern):
             return command
-    
+
     return None
 
 
@@ -270,7 +271,7 @@ def save_cache(
 
 def create_schema():
     """Create Tantivy schema for document indexing."""
-    schema_builder = tantivy.SchemaBuilder()
+    schema_builder = tantivy.SchemaBuilder()  # type: ignore
 
     # Define fields for the schema
     schema_builder.add_text_field("path", stored=True)
@@ -304,7 +305,7 @@ def get_or_create_index(collection_dir: str) -> tuple:
     if os.path.exists(os.path.join(index_dir, "meta.json")):
         # Try to open existing index
         try:
-            index = tantivy.Index.open(index_dir)
+            index = tantivy.Index.open(index_dir)  # type: ignore
             return index, None  # We don't need the schema for opened indexes
         except Exception as e:
             # If opening failed, create a new one
@@ -333,7 +334,7 @@ def get_or_create_index(collection_dir: str) -> tuple:
         json.dump(schema_info, f, indent=2)
 
     # Create the index
-    index = tantivy.Index(schema, path=index_dir)
+    index = tantivy.Index(schema, path=index_dir)  # type: ignore
     return index, schema
 
 
@@ -341,13 +342,13 @@ def index_file(collection_dir: str, file_path: str, metadata: Dict[str, Any]) ->
     """Index a file using Tantivy."""
     try:
         # Get or create index
-        index, schema = get_or_create_index(collection_dir)
+        index, _schema = get_or_create_index(collection_dir)
 
         # Create a writer for adding documents
         writer = index.writer()
 
         # Create document
-        doc = tantivy.Document()
+        doc = tantivy.Document()  # type: ignore
 
         # Get relative path as identifier
         rel_path = os.path.relpath(file_path, collection_dir)
@@ -419,7 +420,7 @@ def perform_search(
 
         try:
             # Open the index
-            index = tantivy.Index.open(index_dir)
+            index = tantivy.Index.open(index_dir)  # type: ignore
             searcher = index.searcher()
 
             # Parse the query using index's parse_query method
@@ -734,7 +735,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Manage searchable collections of files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__.split("\n\n", 1)[1],  # Use the docstring as extended help
+        epilog=__doc__.split("\n\n", 1)[1]
+        if __doc__
+        else ""
+        if __doc__
+        else "",  # Use the docstring as extended help
     )
     parser.add_argument("--version", action="version", version="search 1.0.0")
 

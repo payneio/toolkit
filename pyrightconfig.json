@@ -1,0 +1,33 @@
+{
+  "include": [
+    "tools",
+    "tests"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".git",
+    "**/.venv"
+  ],
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Linux",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportOptionalMemberAccess": true,
+  "reportOptionalSubscript": true,
+  "reportOptionalCall": true,
+  "reportOptionalIterable": true,
+  "reportOptionalContextManager": true,
+  "reportOptionalOperand": true,
+  "reportUnnecessaryIsInstance": false,
+  "reportUnnecessaryCast": false,
+  "reportConstantRedefinition": true,
+  "reportIncompatibleMethodOverride": true,
+  "reportIncompatibleVariableOverride": true,
+  "reportUnusedImport": true,
+  "reportUnusedClass": false,
+  "reportUnusedFunction": false,
+  "reportUnusedVariable": true,
+  "reportDuplicateImport": true
+}

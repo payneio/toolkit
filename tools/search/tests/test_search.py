@@ -9,12 +9,12 @@ import tempfile
 import unittest
 import shutil
 
-print(sys.executable)
-print(sys.path)
-
 # Add parent directory to path so we can import the search module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import search
+
+print(sys.executable)
+print(sys.path)
 
 
 class TestSearchInit(unittest.TestCase):
@@ -41,10 +41,10 @@ class TestSearchInit(unittest.TestCase):
             force = False
 
         args = Args()
-        args.directory = self.test_dir
+        args.directory = self.test_dir  # type: ignore
 
         # Run the init command
-        result = search.cmd_init(args)
+        result = search.cmd_init(args)  # type: ignore
 
         # Check the result
         self.assertEqual(result, 0)
