@@ -31,7 +31,7 @@ import os
 import re
 import smtplib
 import sys
-from email.message import EmailMessage
+from email.message import EmailMessage, Message
 from email.utils import formatdate, make_msgid, parsedate_to_datetime
 from pathlib import Path
 from typing import Any
@@ -41,9 +41,11 @@ def load_config() -> dict[str, Any]:
     """Load configuration from environment variables or use defaults."""
     username = os.environ.get("PROTONMAIL_USERNAME", "")
     if not username:
-        print("Error: PROTONMAIL_USERNAME environment variable not set", file=sys.stderr)
+        print(
+            "Error: PROTONMAIL_USERNAME environment variable not set", file=sys.stderr
+        )
         sys.exit(1)
-        
+
     api_key = os.environ.get("PROTONMAIL_API_KEY", "")
     if not api_key:
         print("Error: PROTONMAIL_API_KEY environment variable not set", file=sys.stderr)
@@ -92,9 +94,13 @@ def list_folders(imap: imaplib.IMAP4) -> list[str]:
     if status != "OK":
         return []
 
-    folder_list = []
+    folder_list: list[str] = []
     for folder in folders:
-        folder_parts = folder.decode().split(' "/"')
+        if isinstance(folder, bytes):
+            folder_str = folder.decode()
+        else:
+            folder_str = str(folder)
+        folder_parts = folder_str.split(' "/"')
         if len(folder_parts) > 1:
             folder_name = folder_parts[-1].strip().strip('"')
             folder_list.append(folder_name)
@@ -127,7 +133,9 @@ def list_emails_local(folder: str = "INBOX", limit: int = 20) -> bool:
         eml_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
         eml_files = eml_files[:limit]
 
-        print(f"\nEmails in {folder} (showing last {len(eml_files)} from local cache):\n")
+        print(
+            f"\nEmails in {folder} (showing last {len(eml_files)} from local cache):\n"
+        )
 
         for eml_file in eml_files:
             try:
@@ -158,7 +166,10 @@ def list_emails_local(folder: str = "INBOX", limit: int = 20) -> bool:
 def list_emails(folder: str = "INBOX", limit: int = 20) -> None:
     """List emails in the specified folder from local cache."""
     if not list_emails_local(folder, limit):
-        print("\nLocal cache not available. Run 'protonmail sync' first to download emails.", file=sys.stderr)
+        print(
+            "\nLocal cache not available. Run 'protonmail sync' first to download emails.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -191,7 +202,7 @@ def read_email_local(filename: str) -> bool:
         print(f"To: {msg.get('To', 'Unknown')}")
         print(f"Subject: {msg.get('Subject', 'No subject')}")
         print(f"Date: {msg.get('Date', 'Unknown')}")
-        print("\n" + "="*70 + "\n")
+        print("\n" + "=" * 70 + "\n")
 
         # Print body
         body = ""
@@ -199,13 +210,13 @@ def read_email_local(filename: str) -> bool:
             for part in msg.walk():
                 content_type = part.get_content_type()
                 if content_type == "text/plain":
-                    body = part.get_payload(decode=True).decode(
-                        "utf-8", errors="ignore",
-                    )
+                    payload = part.get_payload(decode=True)
+                    if isinstance(payload, bytes):
+                        body = payload.decode("utf-8", errors="ignore")
                     break
         else:
             payload = msg.get_payload(decode=True)
-            if payload:
+            if payload and isinstance(payload, bytes):
                 body = payload.decode("utf-8", errors="ignore")
 
         print(body)
@@ -221,7 +232,10 @@ def read_email_local(filename: str) -> bool:
 def read_email(filename: str) -> None:
     """Read a specific email by filename from local cache."""
     if not read_email_local(filename):
-        print("\nLocal cache not available. Run 'protonmail sync' first to download emails.", file=sys.stderr)
+        print(
+            "\nLocal cache not available. Run 'protonmail sync' first to download emails.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -241,7 +255,7 @@ def search_emails_local(query: str, folder: str = "INBOX") -> bool:
             return False
 
         # Search through all .eml files
-        matches = []
+        matches: list[tuple[Path, Message]] = []
         query_lower = query.lower()
 
         for eml_file in folder_path.glob("*.eml"):
@@ -264,7 +278,9 @@ def search_emails_local(query: str, folder: str = "INBOX") -> bool:
             return True
 
         # Display results
-        print(f"\nFound {len(matches)} email(s) matching '{query}' (from local cache):\n")
+        print(
+            f"\nFound {len(matches)} email(s) matching '{query}' (from local cache):\n"
+        )
 
         # Sort by modification time (most recent first)
         matches.sort(key=lambda x: x[0].stat().st_mtime, reverse=True)
@@ -291,7 +307,10 @@ def search_emails_local(query: str, folder: str = "INBOX") -> bool:
 def search_emails(query: str, folder: str = "INBOX") -> None:
     """Search emails by subject or sender in local cache."""
     if not search_emails_local(query, folder):
-        print("\nLocal cache not available. Run 'protonmail sync' first to download emails.", file=sys.stderr)
+        print(
+            "\nLocal cache not available. Run 'protonmail sync' first to download emails.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -303,7 +322,7 @@ def send_email(config: dict[str, Any]) -> None:
         subject = input("Subject: ")
 
         # Collect message body
-        body_lines = []
+        body_lines: list[str] = []
         while True:
             try:
                 line = input()
@@ -350,7 +369,7 @@ def sanitize_filename(filename: str) -> str:
     # Remove or replace invalid filename characters
     filename = re.sub(r'[<>:"/\\|?*]', "_", filename)
     # Remove control characters
-    filename = re.sub(r'[\x00-\x1f\x7f]', "", filename)
+    filename = re.sub(r"[\x00-\x1f\x7f]", "", filename)
     # Limit length to 200 characters
     if len(filename) > 200:
         filename = filename[:200]
@@ -364,20 +383,20 @@ def sanitize_email(email_addr: str) -> str:
     # Remove angle brackets and quotes
     email_addr = re.sub(r'[<>"\']', "", email_addr)
     # Replace other invalid characters with underscore
-    email_addr = re.sub(r'[/\\:*?|]', "_", email_addr)
+    email_addr = re.sub(r"[/\\:*?|]", "_", email_addr)
     return email_addr.strip()
 
 
 def extract_email_address(email_field: str) -> str:
     """Extract just the email address from a field like 'Name <email@domain.com>'."""
     # Try to find email in angle brackets
-    match = re.search(r'<([^>]+)>', email_field)
+    match = re.search(r"<([^>]+)>", email_field)
     if match:
         return match.group(1)
     # If no angle brackets, check if it looks like an email
     if "@" in email_field:
         # Remove quotes and extra whitespace
-        return email_field.strip().strip('"\'')
+        return email_field.strip().strip("\"'")
     return email_field.strip()
 
 
@@ -387,7 +406,7 @@ def get_sync_dir() -> Path:
     return Path(f"{ddata}/messages/email/protonmail")
 
 
-def generate_email_filename(msg: email.message.Message, max_length: int = 255) -> str:
+def generate_email_filename(msg: Message, max_length: int = 255) -> str:
     """Generate filename in format: YYYY-MM-DD_HH-MM-SS_from_FROM_to_TO_SUBJECT.eml."""
     # Parse date
     msg_date = msg.get("Date", "")
@@ -478,7 +497,7 @@ def sync_emails(config: dict[str, Any], output_dir: str | None = None) -> None:
             skipped = 0
 
             # Build a set of existing Message-IDs for idempotency
-            existing_message_ids = set()
+            existing_message_ids: set[str] = set()
             for existing_file in folder_path.glob("*.eml"):
                 try:
                     with open(existing_file, "rb") as f:
@@ -494,10 +513,12 @@ def sync_emails(config: dict[str, Any], output_dir: str | None = None) -> None:
                 try:
                     # Fetch the complete email
                     status, data = imap.fetch(msg_id, "(RFC822)")
-                    if status != "OK":
+                    if status != "OK" or not data or not data[0]:
                         continue
 
                     raw_email = data[0][1]
+                    if not isinstance(raw_email, bytes):
+                        continue
                     msg = email.message_from_bytes(raw_email)
 
                     # Check if we already have this email by Message-ID (true idempotency)
@@ -520,7 +541,9 @@ def sync_emails(config: dict[str, Any], output_dir: str | None = None) -> None:
                         existing_message_ids.add(msg_message_id)
 
                 except Exception as e:
-                    print(f"    Warning: Error processing message {msg_id.decode()}: {e}")
+                    print(
+                        f"    Warning: Error processing message {msg_id.decode()}: {e}"
+                    )
                     continue
 
             print(f"    Synced: {synced} new, {skipped} already existed")
@@ -544,7 +567,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Access and manage ProtonMail emails via Bridge",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__.split("\n\n", 1)[1],
+        epilog=__doc__.split("\n\n", 1)[1] if __doc__ else "",
     )
 
     # Add subparsers for different commands
@@ -553,7 +576,10 @@ def main() -> int:
     # List command
     list_parser = subparsers.add_parser("list", help="List emails")
     list_parser.add_argument(
-        "folder", nargs="?", default="INBOX", help="Folder to list (default: INBOX)",
+        "folder",
+        nargs="?",
+        default="INBOX",
+        help="Folder to list (default: INBOX)",
     )
     list_parser.add_argument(
         "-n",
@@ -571,14 +597,19 @@ def main() -> int:
     search_parser = subparsers.add_parser("search", help="Search for emails")
     search_parser.add_argument("query", help="Search term (subject or sender)")
     search_parser.add_argument(
-        "-f", "--folder", default="INBOX", help="Folder to search (default: INBOX)",
+        "-f",
+        "--folder",
+        default="INBOX",
+        help="Folder to search (default: INBOX)",
     )
 
     # Send command
     subparsers.add_parser("send", help="Send a new email (interactive)")
 
     # Sync command
-    sync_parser = subparsers.add_parser("sync", help="Sync all emails to local .eml files")
+    sync_parser = subparsers.add_parser(
+        "sync", help="Sync all emails to local .eml files"
+    )
     sync_parser.add_argument(
         "-o",
         "--output",
