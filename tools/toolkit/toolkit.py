@@ -123,34 +123,42 @@ def print_tool_info(tool_name, tools):
         return 1
 
     print(f"{tool['command']} - {tool['description']}")
-    print("=" * (len(tool["command"]) + len(tool["description"]) + 3))
+    print("=" * 70)
     print(f"Category: {tool['category']}")
     print(f"Version: {tool['version']}")
-
     if tool.get("system_dependencies"):
         deps = ", ".join(tool["system_dependencies"])
         print(f"System Dependencies: {deps}")
+    print("=" * 70)
 
-    # Try to find and display the script's docstring
-    script_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+    # Try to find and display the markdown documentation
+    # Go up three directories from toolkit.py: toolkit.py -> toolkit/ -> tools/ -> root/
+    toolkit_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    )
+    md_path = os.path.join(
+        toolkit_root,
         "tools",
         tool["category"],
-        os.path.basename(tool["script"]),
+        f"{tool['command']}.md",
     )
 
-    if os.path.exists(script_path):
+    if os.path.exists(md_path):
         try:
-            with open(script_path, "r") as f:
+            with open(md_path, "r") as f:
                 content = f.read()
-                docstring_start = content.find('"""') + 3
-                docstring_end = content.find('"""', docstring_start)
-                if docstring_start > 2 and docstring_end > docstring_start:
-                    docstring = content[docstring_start:docstring_end].strip()
-                    print("\nHelp:")
-                    print(docstring)
+
+                # Skip frontmatter and get documentation content
+                if content.startswith("---\n"):
+                    end_match = content.find("\n---\n", 4)
+                    if end_match != -1:
+                        # Extract content after frontmatter
+                        doc_content = content[end_match + 5 :].strip()
+                        if doc_content:
+                            print("\n")
+                            print(doc_content)
         except Exception as e:
-            print(f"Error reading script file: {e}", file=sys.stderr)
+            print(f"Error reading markdown file: {e}", file=sys.stderr)
 
     return 0
 
