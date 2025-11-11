@@ -1,55 +1,61 @@
-# Backup System
+# System Tools
 
-Gathers files not in /data into /data/backup
+System administration and automation tools.
 
-## Configuration
+## Tools
 
-Configuration file located at `~/.config/toolkit/backup-config.json`:
+### [schedule](SCHEDULE.md)
 
-```json
-{
-  "sources": [
-    {
-      "name": "config",
-      "paths": ["~/.config", "~/env.sh"],
-      "exclusions": ["~/.config/Code/Cache/*"]
-    }
-  ],
-  "external": {
-    "destinations": [
-      {
-        "name": "t9_drive",
-        "path": "/media/payne/T9/backups",
-        "priority": 1
-      },
-      {
-        "name": "backup_mount",
-        "path": "/mnt/backup",
-        "priority": 2
-      }
-    ]
-  },
-  "retention": {
-    "local": 7,
-    "external": 5
-  },
-  "schedule": {
-    "incremental": "daily",
-    "full": "weekly",
-    "external": "weekly"
-  }
-}
+Manage systemd user timers and services. Create, manage, and monitor scheduled tasks using systemd.
+
+**Quick start:**
+```bash
+# Create a timer
+schedule add my-task \
+    --command "echo hello" \
+    --schedule "5min"
+
+# Manage timers
+schedule list
+schedule status my-task
+schedule logs my-task --follow
 ```
 
-## Basic Usage
+See [SCHEDULE.md](SCHEDULE.md) for full documentation.
 
-### Creating Backups
+### [backup-collect](backup_collect.md)
+
+Collect system information and configuration files for backup.
+
+**Quick start:**
+```bash
+backup-collect -o ~/backups/system-$(date +%Y%m%d)
+```
+
+See [backup_collect.md](backup_collect.md) for full documentation.
+
+## Common Workflows
+
+### Scheduled Backups
 
 ```bash
-backup-collect
+# Daily system info collection
+schedule add daily-backup \
+    --command "backup-collect -o /mnt/backups/system-\$(date +\%Y\%m\%d)" \
+    --schedule "daily" \
+    --on-calendar "*-*-* 02:00:00"
 ```
 
-## Environment Variables
+### Recurring Tasks
 
-- `DBACKUP`: Main backup directory (default: /data/backup)
-- `BACKUP_RETENTION`: Number of backups to keep (overrides config file settings)
+```bash
+# Run cleanup every hour
+schedule add cleanup \
+    --command "/path/to/cleanup.sh" \
+    --schedule "1hour"
+
+# Run sync every 5 minutes
+schedule add sync \
+    --command "rsync -av source/ dest/" \
+    --schedule "5min"
+```

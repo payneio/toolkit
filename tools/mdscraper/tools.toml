@@ -1,6 +1,0 @@
-[[tool]]
-command = "mdscraper"
-script = "mdscraper/mdscraper.py"
-description = "Combine text files from a directory into a single markdown document with .gitignore-style filtering"
-version = "1.0.0"
-system_dependencies = []

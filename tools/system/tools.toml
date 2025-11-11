@@ -1,6 +1,0 @@
-[[tool]]
-command = "backup-collect"
-script = "system/backup-collect.py"
-description = "Collect files from various sources into backup directory"
-version = "1.0.0"
-system_dependencies = ["rsync"]

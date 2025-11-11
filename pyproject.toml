@@ -48,10 +48,8 @@ mdscraper = "tools.mdscraper.mdscraper:main"
 protonmail = "tools.email.protonmail:main"
 
 # System tools
-backup = "tools.system.backup:main"
 backup-collect = "tools.system.backup_collect:main"
-backup-external = "tools.system.backup_external:main"
-backup-restore = "tools.system.backup_restore:main"
+schedule = "tools.system.schedule:main"
 
 # Android tools
 android-backup = "tools.android.android_backup:main"

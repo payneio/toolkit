@@ -21,13 +21,37 @@ import os
 import json
 import argparse
 import glob
-import toml
+import yaml
 from pathlib import Path
 import re
 
 
+def parse_frontmatter(md_path):
+    """Parse YAML frontmatter from a markdown file"""
+    try:
+        with open(md_path, "r") as f:
+            content = f.read()
+
+        # Check for frontmatter
+        if not content.startswith("---\n"):
+            return None
+
+        # Find the closing ---
+        end_match = content.find("\n---\n", 4)
+        if end_match == -1:
+            return None
+
+        # Extract and parse YAML
+        frontmatter = content[4:end_match]
+        return yaml.safe_load(frontmatter)
+
+    except Exception as e:
+        print(f"Error parsing frontmatter in {md_path}: {e}", file=sys.stderr)
+        return None
+
+
 def get_tools_info():
-    """Get information about all tools from their tools.toml files"""
+    """Get information about all tools from their markdown frontmatter"""
     # Find the toolkit directory (parent of the directory containing this script)
     script_path = os.path.realpath(__file__)
     script_dir = os.path.dirname(script_path)
@@ -35,36 +59,26 @@ def get_tools_info():
     tools_dir = os.path.join(toolkit_dir, "tools")
     tools = []
 
-    for toml_file in glob.glob(
-        os.path.join(tools_dir, "**", "tools.toml"), recursive=True
-    ):
-        category = os.path.basename(os.path.dirname(toml_file))
-        try:
-            data = toml.load(toml_file)
+    # Find all markdown files in tools subdirectories
+    for md_file in glob.glob(os.path.join(tools_dir, "**", "*.md"), recursive=True):
+        # Skip README files and files in test directories
+        if os.path.basename(md_file) == "README.md" or "/tests/" in md_file:
+            continue
 
-            # Handle single tool or list of tools
-            tool_data = data.get("tool", [])
-            if not isinstance(tool_data, list):
-                tool_data = [tool_data]
+        # Parse frontmatter
+        metadata = parse_frontmatter(md_file)
 
-            for tool in tool_data:
-                if (
-                    isinstance(tool, dict)
-                    and "command" in tool
-                    and "description" in tool
-                ):
-                    tools.append(
-                        {
-                            "command": tool["command"],
-                            "description": tool["description"],
-                            "category": category,
-                            "version": tool.get("version", "1.0.0"),
-                            "system_dependencies": tool.get("system_dependencies", []),
-                            "script": tool.get("script", ""),
-                        }
-                    )
-        except Exception as e:
-            print(f"Error loading {toml_file}: {e}", file=sys.stderr)
+        if metadata and "command" in metadata and "description" in metadata:
+            tools.append(
+                {
+                    "command": metadata["command"],
+                    "description": metadata["description"],
+                    "category": metadata.get("category", "unknown"),
+                    "version": metadata.get("version", "1.0.0"),
+                    "system_dependencies": metadata.get("system_dependencies", []),
+                    "script": metadata.get("script", ""),
+                }
+            )
 
     return sorted(tools, key=lambda x: x["command"])
 
@@ -268,30 +282,71 @@ if __name__ == "__main__":
     script_file.chmod(0o755)
     print(f"Created {script_file.relative_to(toolkit_root)}")
 
-    # Update or create tools.toml
-    toml_file = tool_dir / "tools.toml"
-    tool_entry = {
-        "command": name,
-        "script": f"{category}/{name}.py",
-        "description": description,
-        "version": "1.0.0",
-        "system_dependencies": [],
-    }
-
-    if toml_file.exists():
-        data = toml.load(toml_file)
-        if "tool" not in data:
-            data["tool"] = []
-        if not isinstance(data["tool"], list):
-            data["tool"] = [data["tool"]]
-        data["tool"].append(tool_entry)
-        with open(toml_file, "w") as f:
-            toml.dump(data, f)
-        print(f"Updated {toml_file.relative_to(toolkit_root)}")
+    # Create markdown documentation with frontmatter
+    md_file = tool_dir / f"{name}.md"
+    if md_file.exists():
+        print(
+            f"Warning: {md_file.relative_to(toolkit_root)} already exists!",
+            file=sys.stderr,
+        )
     else:
-        with open(toml_file, "w") as f:
-            toml.dump({"tool": [tool_entry]}, f)
-        print(f"Created {toml_file.relative_to(toolkit_root)}")
+        # Prepare frontmatter metadata
+        metadata = {
+            "command": name,
+            "script": f"{category}/{name}.py",
+            "description": description,
+            "version": "1.0.0",
+            "category": category,
+        }
+
+        # Generate markdown with frontmatter
+        frontmatter = yaml.dump(metadata, default_flow_style=False, sort_keys=False)
+        md_content = f"""---
+{frontmatter}---
+
+# {name}
+
+{description}
+
+## Installation
+
+```bash
+cd /path/to/toolkit
+make install
+which {name}
+```
+
+## Usage
+
+```bash
+{name} [options]
+```
+
+### Options
+
+```bash
+{name} [options]
+
+Options:
+  -h, --help          Show help message
+```
+
+## Examples
+
+```bash
+# Example usage
+{name}
+```
+
+## Features
+
+- Feature 1
+- Feature 2
+- Feature 3
+"""
+
+        md_file.write_text(md_content)
+        print(f"Created {md_file.relative_to(toolkit_root)}")
 
     # Update pyproject.toml
     pyproject_file = toolkit_root / "pyproject.toml"
@@ -305,7 +360,7 @@ if __name__ == "__main__":
     print()
     print("Next steps:")
     print(f"  1. Edit the implementation: {script_file.relative_to(toolkit_root)}")
-    print(f"  2. Update metadata (optional): {toml_file.relative_to(toolkit_root)}")
+    print(f"  2. Update documentation: {md_file.relative_to(toolkit_root)}")
 
     if not pyproject_updated:
         print(f'  3. Add to pyproject.toml: {name} = "{module_path}:main"')

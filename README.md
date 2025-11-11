@@ -24,16 +24,16 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 ├── tools/            # Individual utilities organized by category
 │   ├── document/     # Document-related tools
 │   │   ├── docx2md.py            # Tool implementation
-│   │   ├── docx2md.1             # Man page (auto-generated)
-│   │   └── tools.toml            # Tool configuration
+│   │   ├── docx2md.md            # Documentation with metadata
+│   │   └── docx2md.1             # Man page (auto-generated)
 │   ├── gpt/          # GPT-related tools
 │   │   ├── gpt.py                # Tool implementation
-│   │   ├── gpt.1                 # Man page (auto-generated)
-│   │   └── tools.toml            # Tool configuration
+│   │   ├── gpt.md                # Documentation with metadata
+│   │   └── gpt.1                 # Man page (auto-generated)
 │   └── toolkit/      # Core toolkit tools
 │       ├── toolkit.py            # Tool implementation
-│       ├── toolkit.1             # Man page (auto-generated)
-│       └── tools.toml            # Tool configuration
+│       ├── toolkit.md            # Documentation with metadata
+│       └── toolkit.1             # Man page (auto-generated)
 ├── src/              # Shared library code
 │   └── myscripts/    
 │       └── __init__.py
@@ -43,6 +43,38 @@ While maintaining the simplicity of Unix tools, we leverage Python's rich ecosys
 ├── Makefile          # Build system and automation
 ├── pyproject.toml    # Project metadata and dependencies
 └── README.md         # This file
+```
+
+## Available Tools
+
+The toolkit includes tools organized into the following categories:
+
+- **android** - Android device backup via ADB
+- **browser** - AI-powered browser automation
+- **document** - Document conversion (PDF, DOCX, Markdown, HTML)
+- **email** - Email management (ProtonMail sync, HTML conversion)
+- **gpt** - OpenAI GPT interaction and chat
+- **mdscraper** - Web scraping and content extraction
+- **search** - File search and text extraction
+- **system** - System management (backups, scheduled tasks)
+- **toolkit** - Toolkit management and discovery
+
+Each tool has comprehensive documentation in its respective `.md` file. Use `toolkit list` to see all available tools or refer to the category README files for quick-start examples.
+
+### Discovering Tools
+
+Use the `toolkit` command to explore available tools:
+
+```bash
+# List all available tools
+toolkit list
+
+# Show detailed information about a specific tool
+toolkit info gpt
+
+# Get JSON output for scripting
+toolkit list --json
+toolkit info docx2md --json
 ```
 
 ## Setup
@@ -74,82 +106,67 @@ That's it! All tools are now available in your PATH.
 
 ### System Dependencies
 
-Some tools require system packages to be installed separately:
+Some tools require system packages to be installed separately. These dependencies are listed in each tool's markdown documentation frontmatter under the `system_dependencies` field.
 
-#### Document Tools
-
-- **md2pdf**: Requires LaTeX for PDF generation
-  ```bash
-  sudo apt install texlive-latex-base texlive-latex-extra
-  ```
-
-- **pdf2md**: Requires poppler-utils and pandoc
-  ```bash
-  sudo apt install poppler-utils pandoc
-  ```
-
-- **docx2md**: Requires pandoc
-  ```bash
-  sudo apt install pandoc
-  ```
-
-These dependencies are listed in each tool's `tools.toml` configuration under the `system_dependencies` field.
+Use `toolkit list --verbose` to see which tools have system dependencies, then refer to the tool's documentation for installation instructions.
 
 ## Creating New Utilities
 
-The toolkit provides a simple workflow for creating new utilities using the `make` system.
+The toolkit provides a streamlined workflow for creating new utilities using the `toolkit create` command.
 
-### Creating a new tool with the make system
+### Creating a new tool
 
-The easiest way to create a new tool is to use the `new-tool` make target:
+The easiest way to create a new tool is to use the `toolkit create` command:
 
 ```bash
-cd ~/toolkit
-make new-tool name=newtool
+# Create a new tool in its own category
+toolkit create mytool --description "Description of my tool"
+
+# Add a tool to an existing category
+toolkit create newtool --category document --description "Document processing tool"
 ```
 
-This will:
-1. Create the tool directory structure
-2. Add a template Python script with proper docstrings
-3. Create the tools.toml configuration file
-4. Remind you to add the entry to pyproject.toml
+This automatically:
+1. Creates the tool directory structure
+2. Generates a Python script with proper template
+3. Creates markdown documentation with YAML frontmatter metadata
+4. Updates pyproject.toml with the tool entry
 
-After creating a new tool, you must add it to the `[project.scripts]` section in [pyproject.toml](pyproject.toml) and run `make install`.
+After creation, just edit the implementation and run `make install` to use your new tool.
 
 ## Tools Configuration System
 
 Tools are defined using Python's standard `[project.scripts]` configuration in [pyproject.toml](pyproject.toml), which allows UV to install them as executable commands.
 
-Each tool category also includes a `tools.toml` configuration file for metadata:
+**Key Design Feature**: Each tool has a single markdown file containing both metadata (YAML frontmatter) and documentation. This design:
+- Eliminates duplication between configuration and documentation files
+- Provides a single source of truth for tool metadata
+- Uses industry-standard YAML frontmatter format (like Jekyll, Hugo, Docusaurus)
+- Makes tool discovery automatic via the `toolkit` command
 
-```toml
-[[tool]]
-command = "mytool"
-script = "mytool/mytool.py"
-description = "Description of the tool"
-version = "1.0.0"
-system_dependencies = ["optional-system-dependency"]
+Each tool includes a markdown documentation file with YAML frontmatter for metadata:
+
+```markdown
+---
+command: mytool
+script: mytool/mytool.py
+description: Description of the tool
+version: 1.0.0
+category: mytool
+system_dependencies:
+  - optional-system-dependency
+---
+
+# mytool
+
+Tool documentation here...
 ```
 
-The `tools.toml` files are used for documentation and the `toolkit` discovery command. The actual installation is handled by the `[project.scripts]` section in pyproject.toml.
+The markdown frontmatter is used for documentation and the `toolkit` discovery command. The actual installation is handled by the `[project.scripts]` section in pyproject.toml.
 
-### Multiple Tools in One Category
+### Single Source of Truth
 
-A single tools.toml file can define multiple related tools:
-
-```toml
-[tool]
-command = "calendar-add"
-script = "calendar/add.py"
-description = "Add an event to the calendar"
-version = "1.0.0"
-
-[tool]
-command = "calendar-list"
-script = "calendar/list.py"
-description = "List calendar events"
-version = "1.0.0"
-```
+Each tool has one markdown file containing both metadata (in YAML frontmatter) and comprehensive documentation. This ensures consistency and makes maintenance easier.
 
 ### Tool Implementation Pattern
 
@@ -250,12 +267,47 @@ extract-events < emails.json > events.json
 cal-add < events.json
 ```
 
-### Running with cron
+### Task Automation with systemd
 
+The toolkit includes the `schedule` tool for managing systemd user timers and services. This provides a modern, robust alternative to cron for task automation:
+
+```bash
+# Enable linger so timers run even when logged out
+loginctl enable-linger $USER
+
+# Schedule a task to run every 5 minutes
+schedule add my-task \
+    --command "my-script" \
+    --schedule "5min" \
+    --description "Run my script every 5 minutes" \
+    -e "API_KEY=secret123"
+
+# View scheduled tasks
+schedule list
+
+# Check task status
+schedule status my-task
+
+# View task logs
+schedule logs my-task --follow
 ```
-# Run daily at 9am
-0 9 * * * $HOME/.local/bin/fetch-email | $HOME/.local/bin/extract-events | $HOME/.local/bin/cal-add > $HOME/logs/schedule-$(date +\%Y\%m\%d).log 2>&1
+
+**Common schedules:**
+- Intervals: `5min`, `1hour`, `2h`, `1day`, `1week`
+- Named: `hourly`, `daily`
+- Calendar: `--on-calendar "*-*-* 02:00:00"` (2 AM daily)
+
+**Example: Auto-sync ProtonMail every 5 minutes**
+```bash
+schedule add protonmail-sync \
+    --command "protonmail sync" \
+    --schedule "5min" \
+    --condition-command "pgrep -f 'protonmail-bridge'" \
+    -e "PROTONMAIL_USERNAME=user@protonmail.com" \
+    -e "PROTONMAIL_API_KEY=your-bridge-api-key"
 ```
+
+See [tools/system/SCHEDULE.md](tools/system/SCHEDULE.md) for complete documentation.
 
 ## Managing Complexity
 
@@ -275,23 +327,20 @@ The toolkit uses a Makefile to automate common tasks, making it easy to maintain
 
 | Target | Description |
 |--------|-------------|
-| `make all` | Run all tasks (bin, man, install, build) |
-| `make bin` | Generate bin launcher scripts from tools.toml |
-| `make man` | Generate man pages from tools.toml |
+| `make all` | Build and install tools |
 | `make build` | Sync dependencies with UV |
-| `make check` | Run linting with Ruff |
-| `make install` | Install both links and man pages |
-| `make install-links` | Install symlinks to ~/.local/bin |
-| `make install-docs` | Install man pages to ~/.local/share/man/man1 |
+| `make install` | Install tools with uv tool install |
+| `make uninstall` | Uninstall toolkit tools |
+| `make check` | Run linting and type-checking |
+| `make test` | Run all tests |
 | `make clean` | Clean up generated files |
-| `make new-tool name=toolname` | Create a new tool |
 
 ### How the Build System Works
 
-1. **Tool Discovery**: The Makefile finds all tools.toml files in the tools directory
-2. **Template-based Generation**: Uses templates to generate bin launchers and man pages
-3. **Dependency Management**: Integrates with UV for Python dependency management
-4. **Installation**: Creates symlinks and installs documentation
+1. **Dependency Management**: Uses UV for Python dependency management
+2. **Tool Installation**: Installs tools as executable commands via pyproject.toml
+3. **Tool Discovery**: The `toolkit` command discovers tools via markdown frontmatter
+4. **Quality Control**: Runs ruff for linting/formatting and pyright for type-checking
 
 ### Example Development Workflow
 
@@ -299,26 +348,26 @@ The toolkit uses a Makefile to automate common tasks, making it easy to maintain
 # Navigate to toolkit directory
 cd ~/toolkit
 
-# Create a new tool
-make new-tool name=mynewcalc
+# Create a new tool (creates .py and .md with frontmatter)
+toolkit create mynewcalc
 
 # Edit the tool implementation
 vim tools/mynewcalc/mynewcalc.py
 
-# Update tool description in tools.toml
-vim tools/mynewcalc/tools.toml
+# Update documentation and metadata
+vim tools/mynewcalc/mynewcalc.md
 
-# Regenerate binaries and man pages
-make bin man
-
-# Run linting to ensure code quality
+# Run linting and type-checking
 make check
 
-# Install the tool
+# Install/reinstall the tool
 make install
 
 # Test your tool
 mynewcalc --help
+
+# List all available tools
+toolkit list
 ```
 
 You can also run tests with:
@@ -327,78 +376,9 @@ You can also run tests with:
 uvx pytest
 ```
 
-## Tool Discovery and Help
+## Additional Resources
 
-The toolkit includes a built-in help system to discover and learn about available tools:
-
-```bash
-# List all available tools
-toolkit
-
-# Get detailed information about a specific tool
-toolkit --info gpt
-
-# Get JSON output of all tools
-toolkit --json
-
-# Get verbose output with dependencies
-toolkit --verbose
-```
-
-## Templates System
-
-The toolkit uses templates for generating files automatically:
-
-### bin_launcher.sh.template
-
-This template is used to generate the shell script launchers in the bin directory:
-
-```bash
-#!/usr/bin/env bash
-
-# Find the toolkit repository directory
-SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
-TOOLKIT_DIR="$(dirname "$SCRIPT_DIR")"
-
-# Tool information 
-TOOL_SCRIPT="$TOOLKIT_DIR/tools/{{TOOL_SCRIPT}}"
-
-# Check if the tool script exists
-if [ ! -f "$TOOL_SCRIPT" ]; then
-    echo "Error: Tool script not found at $TOOL_SCRIPT"
-    exit 1
-fi
-
-# Run the tool script using UV for dependency management
-uv run --project-dir "$TOOLKIT_DIR" "$TOOL_SCRIPT" "$@"
-```
-
-### man.template
-
-This template is used to generate basic man pages for each tool. Note that these are just stubs - the Makefile is designed to never overwrite existing man pages, so tool developers can create detailed manual pages that won't be lost during rebuilds.
-
-```
-.TH {{COMMAND_UPPER}} 1 "{{DATE}}" "Toolkit" "User Commands"
-.SH NAME
-{{command}} \- {{description}}
-.SH SYNOPSIS
-.B {{command}}
-[\fIOPTIONS\fR]
-.SH DESCRIPTION
-{{description}}
-.SH OPTIONS
-.TP
-.B \-\-help
-Show help message and exit.
-.TP
-.B \-\-version
-Show version information and exit.
-.SH EXAMPLES
-.PP
-{{command}} --help
-.SH SEE ALSO
-.BR toolkit (1)
-```
-
-These auto-generated man pages are basic stubs. When developing serious tools, you should replace them with detailed documentation. Once you've created a custom man page, the `make man` command will respect your changes and won't overwrite your file.
+For more detailed information:
+- **Tool Creation Guide**: See [docs/TOOL_CREATION_GUIDE.md](docs/TOOL_CREATION_GUIDE.md) for comprehensive tool development instructions
+- **Individual Tool Documentation**: Each tool has its own `.md` file with detailed usage examples
+- **Category READMEs**: Check category-specific README files for domain-specific workflows

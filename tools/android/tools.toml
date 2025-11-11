@@ -1,6 +1,0 @@
-[[tool]]
-command = "android-backup"
-script = "android/android-backup.py"
-description = "Backup Android device using ADB"
-version = "1.0.0"
-system_dependencies = ["adb"]

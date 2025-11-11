@@ -1,9 +1,0 @@
-# ProtonMail Environment Configuration
-# Copy this file to ~/.config/protonmail/env and fill in your credentials
-
-# ProtonMail Bridge credentials
-PROTONMAIL_USERNAME=your-email@protonmail.com
-PROTONMAIL_API_KEY=your-bridge-api-key
-
-# Data directory (optional, defaults to ~/data)
-# DDATA=/home/yourusername/data

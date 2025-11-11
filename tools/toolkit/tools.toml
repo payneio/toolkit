@@ -1,6 +1,0 @@
-[[tool]]
-command = "toolkit"
-script = "toolkit/toolkit.py"
-description = "Manage and discover toolkit utilities"
-version = "1.0.0"
-system_dependencies = []

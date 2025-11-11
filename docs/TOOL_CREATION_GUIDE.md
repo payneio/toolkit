@@ -2,10 +2,36 @@
 
 This guide provides the essential steps and information needed to create a new tool for the toolkit framework.
 
-## Quick Reference
+## Recommended Approach: Use `toolkit create`
+
+The easiest and recommended way to create a new tool:
+
+```bash
+# Create a new tool in its own category
+toolkit create mytool --description "Description of my tool"
+
+# Add a tool to an existing category
+toolkit create newtool --category document --description "New document tool"
+```
+
+This automatically:
+- Creates the Python script with proper template
+- Creates markdown documentation with YAML frontmatter
+- Updates pyproject.toml with the tool entry
+- Sets up proper directory structure
+
+Then just:
+1. Edit `tools/<category>/<tool>.py` to implement functionality
+2. Update `tools/<category>/<tool>.md` to enhance documentation
+3. Run `make install` to install
+4. Test with `<tool> --help`
+
+## Manual Creation (Advanced)
+
+For advanced users who want full control, here are the manual steps:
 
 1. **Check for existing tools**
-   - Run `toolkit` to list existing tools
+   - Run `toolkit list` to see all existing tools
    - Check if similar functionality already exists
    - Determine appropriate category or create new one
 
@@ -18,27 +44,25 @@ This guide provides the essential steps and information needed to create a new t
    - Make a category directory if needed: `mkdir -p tools/<category>`
    - Create tool-specific directory ONLY if needed for complex tools: `mkdir -p tools/<category>/<toolname>`
 
-4. **Update category's tools.toml file**
-   - Each category has ONE tools.toml file at `tools/<category>/tools.toml`
-   - For multiple tools in a category, add each as a separate [tool] entry in the same file
-   - Create the file if it doesn't exist or append to it if it does
-   
-   ```toml
-   # First tool in the category
-   [tool]
-   command = "tool-name"
-   script = "category/tool-name.py"
-   description = "Clear description of what the tool does"
-   version = "1.0.0"
-   system_dependencies = ["optional-dependency"]
-   
-   # Second tool in the same category (if applicable)
-   [tool]
-   command = "another-tool"
-   script = "category/another-tool.py"
-   description = "Description of another tool"
-   version = "1.0.0"
-   system_dependencies = ["another-dependency"]
+4. **Create markdown documentation with frontmatter**
+   - Each tool has its own markdown file at `tools/<category>/<tool-name>.md`
+   - Add YAML frontmatter with metadata at the top
+   - Include comprehensive documentation below the frontmatter
+
+   ```markdown
+   ---
+   command: tool-name
+   script: category/tool-name.py
+   description: Clear description of what the tool does
+   version: 1.0.0
+   category: category
+   system_dependencies:
+     - optional-dependency
+   ---
+
+   # tool-name
+
+   Tool documentation goes here...
    ```
 
 5. **Create Python script**
@@ -46,18 +70,15 @@ This guide provides the essential steps and information needed to create a new t
    - Follow script template below
    - Ensure script is executable: `chmod +x tools/<category>/<tool-name>.py`
 
-6. **Documentation**
-   - Create good docstrings and help text in the script
-   - Documentation is provided through --help, not man pages
+6. **Add to pyproject.toml**
+   - Add tool entry to `[project.scripts]` section in pyproject.toml
+   - Or use `toolkit create <tool-name>` to generate everything automatically
+   - Format: `tool-name = "tools.category.tool_name:main"`
 
-7. **Create README.md (optional but recommended)**
-   - Create a README.md if the tool needs additional developer information
-   - Include configuration details, API information, or advanced usage
-   - Place at `tools/<category>/README.md` or `tools/<category>/<tool-name>/README.md`
-
-8. **Generate bin launcher and install**
-   - Run `make bin` to generate bin launcher
+7. **Install and test**
    - Run `make install` to install the tool
+   - Test with `tool-name --help`
+   - Verify with `toolkit list` to see it in the available tools
 
 ## Python Script Template
 
@@ -206,13 +227,14 @@ See also: toolkit, related-tool
    - Check for environment variables with `os.environ.get("VARIABLE_NAME")` with fallbacks
    - Document any required environment variables in both the man page and README.md
 
-## Using the Make System
+## Make Targets
 
-- `make new-tool name=toolname` - Create a new tool skeleton (alternative to manual creation)
-- `make bin` - Generate bin launcher scripts
-- `make man` - Generate man pages (will not overwrite existing man pages)
-- `make install` - Install tools to ~/.local/bin and man pages
-- `make all` - Run all necessary steps to build and install
+Useful make commands for development:
+- `make install` - Install/reinstall all tools (use after changes)
+- `make check` - Run linting and type-checking
+- `make test` - Run all tests
+- `make clean` - Clean up generated files
+- `make all` - Build and install everything
 
 ## Python Dependencies
 

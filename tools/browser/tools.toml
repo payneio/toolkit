@@ -1,6 +1,0 @@
-[[tool]]
-command = "browser"
-script = "browser/browser.py"
-description = "Browse the web using natural language via browser-use"
-version = "1.0.0"
-

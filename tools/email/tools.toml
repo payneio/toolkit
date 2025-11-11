@@ -1,6 +1,0 @@
-[[tool]]
-command = "protonmail"
-script = "email/protonmail.py"
-description = "Access and manage ProtonMail emails via Bridge"
-version = "1.0.0"
-system_dependencies = ["protonmail-bridge"]
